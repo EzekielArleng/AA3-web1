@@ -1,0 +1,9 @@
+br/ufscar/dc/dsw/com/gametester/model/Estrategia.class
+br/ufscar/dc/dsw/GameTesterSystemApplication.class
+br/ufscar/dc/dsw/com/gametester/model/Bug.class
+br/ufscar/dc/dsw/com/gametester/model/GeradorDeSenha.class
+br/ufscar/dc/dsw/com/gametester/model/StatusSessao.class
+br/ufscar/dc/dsw/com/gametester/model/SessaoTeste.class
+br/ufscar/dc/dsw/com/gametester/model/Severidade.class
+br/ufscar/dc/dsw/com/gametester/model/Usuario.class
+br/ufscar/dc/dsw/com/gametester/model/Projeto.class

@@ -1,0 +1,9 @@
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/GameTesterSystemApplication.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/Bug.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/Estrategia.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/GeradorDeSenha.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/Projeto.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/SessaoTeste.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/Severidade.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/StatusSessao.java
+/home/luiz/Downloads/game-tester-system/src/main/java/br/ufscar/dc/dsw/com/gametester/model/Usuario.java

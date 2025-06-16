@@ -12,7 +12,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name="usuarios")
-public class Usuario implements Serializable {
+public class Usuario implements UserDetails, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -30,8 +30,9 @@ public class Usuario implements Serializable {
     @Column(nullable = false)
     private String senha;
 
-    @Column(nullable = false)
-    private String tipoPerfil; //Ex: "ADMINISTRADOR, "TESTADOR"
+    @Enumerated(EnumType.STRING) // 3. ESSA ANOTAÇÃO É CRUCIAL!
+    @Column(nullable = false, length = 20)
+    private TipoPerfil tipoPerfil;
 
     @ManyToMany(mappedBy = "membros")
     private Set<Projeto> projetos = new HashSet<>();
@@ -39,7 +40,7 @@ public class Usuario implements Serializable {
     public Usuario() {
     }
 
-    public Usuario(Long id, String nome, String email, String senha, String tipoPerfil) {
+    public Usuario(Long id, String nome, String email, String senha, TipoPerfil tipoPerfil) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -80,11 +81,11 @@ public class Usuario implements Serializable {
         this.senha = senha;
     }
 
-    public String getTipoPerfil() {
+    public TipoPerfil getTipoPerfil() {
         return tipoPerfil;
     }
 
-    public void setTipoPerfil(String tipoPerfil) {
+    public void setTipoPerfil(TipoPerfil tipoPerfil) {
         this.tipoPerfil = tipoPerfil;
     }
 
@@ -96,6 +97,52 @@ public class Usuario implements Serializable {
         this.projetos = projetos;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // O .name() do nosso enum já retorna "ROLE_ADMINISTRADOR" ou "ROLE_TESTADOR"
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(this.tipoPerfil.name());
+        return Collections.singletonList(authority);
+    }
+
+    /**
+     * Retorna a senha com hash.
+     */
+    @Override
+    public String getPassword() {
+        return this.senha;
+    }
+
+    /**
+     * Retorna o campo que será usado como "username" para login. No nosso caso, o e-mail.
+     */
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    // Para os métodos booleanos abaixo, vamos retornar 'true' por padrão.
+    // Em um sistema mais complexo, você poderia ter campos no banco para
+    // controlar se uma conta está bloqueada, expirada, etc.
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
     @Override
     public String toString() {

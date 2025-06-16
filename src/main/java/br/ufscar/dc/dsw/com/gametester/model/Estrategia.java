@@ -11,8 +11,9 @@ public class Estrategia implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id; // ✅ CORREÇÃO: Mude de int para Integer
 
+    @Column(nullable = false, unique = true, length = 100)
     private String nome;
 
     @Column(columnDefinition = "TEXT")
@@ -29,7 +30,7 @@ public class Estrategia implements Serializable {
     public Estrategia() {
     }
 
-    public Estrategia(int id, String nome, String descricao, String exemplos, String dicas) {
+    public Estrategia(Integer id, String nome, String descricao, String exemplos, String dicas) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;

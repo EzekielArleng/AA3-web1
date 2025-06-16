@@ -36,16 +36,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        // Exemplo: Permitir acesso à página de registro e recursos estáticos
-                        .requestMatchers("/usuarios/novo", "/css/**", "/js/**").permitAll()
-                        // Exemplo: Exigir autenticação para qualquer outra requisição
+                        // ✅ Permite acesso a todos para a pág. de login e recursos estáticos
+                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+                        // ✅ Permite acesso à página inicial para todos
+                        .requestMatchers("/").permitAll()
+                        // Outras regras
+                        .requestMatchers("/testador/**").hasAnyRole("TESTADOR", "ADMINISTRADOR")
+                        .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form // Configura o formulário de login
-                        .loginPage("/login") // URL da sua página de login customizada
-                        .permitAll() // Permite acesso à página de login para todos
+                .formLogin(form -> form
+                        .loginPage("/login") // 1. Diz ao Spring qual é a sua página de login
+                        .defaultSuccessUrl("/testador/meus-projetos", true) // 2. Para onde ir após o login bem-sucedido
+                        .permitAll() // 3. Permite que todos acessem a URL de login
                 )
-                .logout(LogoutConfigurer::permitAll); // Permite que todos façam logout
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login?logout") // Para onde ir após o logout
+                        .permitAll()
+                );
 
         return http.build();
     }

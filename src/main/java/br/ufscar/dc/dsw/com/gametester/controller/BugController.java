@@ -1,9 +1,12 @@
 // src/main/java/com/gametester/controller/BugController.java
 package br.ufscar.dc.dsw.com.gametester.controller;
 
+import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.model.Bug;
+import br.ufscar.dc.dsw.com.gametester.model.Usuario;
 import br.ufscar.dc.dsw.com.gametester.service.BugService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +44,8 @@ public class BugController {
 
     // Processa o envio do formulário de criação
     @PostMapping
-    public String criarBug(@PathVariable Integer sessaoId, @ModelAttribute Bug bug, RedirectAttributes redirectAttributes) {
-        bugService.criarBug(bug, sessaoId);
+    public String criarBug(@PathVariable Long sessaoId, BugCreateDTO bug, @AuthenticationPrincipal Usuario usuarioLogado, RedirectAttributes redirectAttributes) {
+        bugService.criarBug(bug, sessaoId, usuarioLogado);
         redirectAttributes.addFlashAttribute("mensagem", "Bug registrado com sucesso!");
         return "redirect:/sessoes/" + sessaoId + "/bugs";
     }

@@ -1,8 +1,11 @@
 package br.ufscar.dc.dsw.com.gametester.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -36,14 +39,15 @@ public class SessaoTeste implements Serializable {
     @Column(length = 20)
     private StatusSessao status;
 
-    @Column(name = "data_hora_criacao")
-    private Timestamp dataHoraCriacao;
+    @CreationTimestamp
+    @Column(name = "data_hora_criacao", nullable = false, updatable = false)
+    private LocalDateTime dataHoraCriacao;
 
     @Column(name = "data_hora_inicio")
-    private Timestamp dataHoraInicio;
+    private LocalDateTime dataHoraInicio;
 
     @Column(name = "data_hora_fim")
-    private Timestamp dataHoraFim;
+    private LocalDateTime dataHoraFim;
 
     @OneToMany(mappedBy = "sessaoTeste", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bug> bugs;
@@ -73,14 +77,14 @@ public class SessaoTeste implements Serializable {
     public StatusSessao getStatus() { return status; }
     public void setStatus(StatusSessao status) { this.status = status; }
 
-    public Timestamp getDataHoraCriacao() { return dataHoraCriacao; }
-    public void setDataHoraCriacao(Timestamp dataHoraCriacao) { this.dataHoraCriacao = dataHoraCriacao; }
+    public LocalDateTime getDataHoraCriacao() { return dataHoraCriacao; }
+    public void setDataHoraCriacao(LocalDateTime data) { this.dataHoraCriacao = data; }
 
-    public Timestamp getDataHoraInicio() { return dataHoraInicio; }
-    public void setDataHoraInicio(Timestamp dataHoraInicio) { this.dataHoraInicio = dataHoraInicio; }
+    public LocalDateTime getDataHoraInicio() { return dataHoraInicio; }
+    public void setDataHoraInicio(LocalDateTime data) { this.dataHoraInicio = data; }
 
-    public Timestamp getDataHoraFim() { return dataHoraFim; }
-    public void setDataHoraFim(Timestamp dataHoraFim) { this.dataHoraFim = dataHoraFim; }
+    public LocalDateTime getDataHoraFim() { return dataHoraFim; }
+    public void setDataHoraFim(LocalDateTime data) { this.dataHoraFim = data; }
 
     public List<Bug> getBugs() { return bugs; }
     public void setBugs(List<Bug> bugs) { this.bugs = bugs; }

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${estrategiaDTO.id == null} ? 'Cadastrar Nova Estratégia' : 'Editar Estratégia'">Formulário</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4" style="max-width: 800px;">
+    <h1 th:text="${estrategiaDTO.id == null} ? 'Cadastrar Nova Estratégia' : 'Editar Estratégia'">Formulário</h1>
+
+    <form th:action="${estrategiaDTO.id == null} ? @{/admin/estrategias/novo} : @{/admin/estrategias/editar}"
+          th:object="${estrategiaDTO}" method="post">
+
+        <input type="hidden" th:if="${estrategiaDTO.id != null}" th:field="*{id}" />
+
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome da Estratégia:</label>
+            <input type="text" id="nome" th:field="*{nome}" class="form-control" required>
+            <div th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}" class="text-danger small"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição:</label>
+            <textarea id="descricao" th:field="*{descricao}" class="form-control" rows="4" required></textarea>
+            <div th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}" class="text-danger small"></div>
+        </div>
+        <div class="mb-3">
+            <label for="exemplos" class="form-label">Exemplos (Opcional):</label>
+            <textarea id="exemplos" th:field="*{exemplos}" class="form-control" rows="4"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="dicas" class="form-label">Dicas (Opcional):</label>
+            <textarea id="dicas" th:field="*{dicas}" class="form-control" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success"
+                th:text="${estrategiaDTO.id == null} ? 'Cadastrar Estratégia' : 'Salvar Alterações'">Salvar</button>
+    </form>
+
+    <div class="mt-4 text-center">
+        <a th:href="@{/admin/estrategias}" class="btn btn-secondary">Voltar para a Lista</a>
+    </div>
+</div>
+</body>
+</html>

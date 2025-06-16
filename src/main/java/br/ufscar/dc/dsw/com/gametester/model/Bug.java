@@ -22,9 +22,9 @@ public class Bug implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10)
-    private Severidade severidade; // Enum abaixo
+    @Enumerated(EnumType.STRING) // 3. Anotação para salvar o nome do enum no banco
+    @Column(nullable = false, length = 20)
+    private Severidade severidade;
 
     @Column(name = "data_registro")
     private Timestamp dataRegistro;

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Minhas Sessões de Teste</title>
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Minhas Sessões de Teste</h2>
+
+    <div th:if="${mensagemSucesso}" class="alert alert-success" role="alert" th:text="${mensagemSucesso}"></div>
+    <div th:if="${mensagemErro}" class="alert alert-danger" role="alert" th:text="${mensagemErro}"></div>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Projeto</th>
+            <th>Estratégia</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sessao : ${listaMinhasSessoes}">
+            <td th:text="${sessao.id}">1</td>
+            <td th:text="${sessao.projeto.nome}">Nome do Projeto</td>
+            <td th:text="${sessao.estrategia.nome}">Nome da Estratégia</td>
+            <td>
+                    <span th:text="${sessao.status.name()}"
+                          th:classappend="${sessao.status.name() == 'CRIADO'} ? 'badge bg-primary' :
+                                         (${sessao.status.name() == 'EM_EXECUCAO'} ? 'badge bg-warning' : 'badge bg-secondary')">
+                        STATUS
+                    </span>
+            </td>
+            <td>
+                <div th:if="${sessao.status.name() == 'CRIADO'}">
+                    <form th:action="@{/testador/sessoes/{id}/iniciar(id=${sessao.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-success btn-sm">Iniciar</button>
+                    </form>
+                </div>
+
+                <div th:if="${sessao.status.name() == 'EM_EXECUCAO'}">
+                    <form th:action="@{/testador/sessoes/{id}/finalizar(id=${sessao.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Finalizar</button>
+                    </form>
+                    <a th:href="@{/testador/sessoes/{id}(id=${sessao.id})}" class="btn btn-primary btn-sm">Ver Detalhes</a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

@@ -1,9 +1,11 @@
 // src/main/java/com/gametester/service/EstrategiaService.java
 package br.ufscar.dc.dsw.com.gametester.service;
 
+import br.ufscar.dc.dsw.com.gametester.dto.EstrategiaDTO;
 import br.ufscar.dc.dsw.com.gametester.model.Estrategia;
 import br.ufscar.dc.dsw.com.gametester.repository.EstrategiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +16,50 @@ import java.util.Objects;
 @Transactional
 public class EstrategiaService {
 
+    @Autowired
     private final EstrategiaRepository estrategiaRepository;
+
+    public Estrategia criarEstrategia(EstrategiaDTO dto) {
+        Estrategia estrategia = new Estrategia();
+        // Mapeia os campos básicos
+        estrategia.setNome(dto.nome());
+        estrategia.setDescricao(dto.descricao());
+        estrategia.setDicas(dto.dicas());
+
+        // Lógica para combinar exemplos e imagem que estava no servlet
+        String exemplosFinais = (dto.exemplos() != null) ? dto.exemplos().trim() : "";
+        if (dto.imagemPath() != null && !dto.imagemPath().trim().isEmpty()) {
+            if (!exemplosFinais.isEmpty()) {
+                exemplosFinais += "\n\n";
+            }
+            exemplosFinais += "[Imagem: " + dto.imagemPath().trim() + "]";
+        }
+        estrategia.setExemplos(exemplosFinais.isEmpty() ? null : exemplosFinais);
+
+        return estrategiaRepository.save(estrategia);
+    }
+
+    public Estrategia editarEstrategia(EstrategiaDTO dto) {
+        Estrategia estrategia = buscarPorId(dto.id());
+        estrategia.setNome(dto.nome());
+        estrategia.setDescricao(dto.descricao());
+        estrategia.setDicas(dto.dicas());
+        estrategia.setExemplos(dto.exemplos()); // Na edição, o campo exemplos já vem completo
+
+        return estrategiaRepository.save(estrategia);
+    }
+
+    public void excluirEstrategia(Integer id) {
+        if (!estrategiaRepository.existsById(id)) {
+            throw new RuntimeException("Estratégia não encontrada para exclusão. ID: " + id);
+        }
+        try {
+            estrategiaRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            // Captura o erro de chave estrangeira
+            throw new RuntimeException("Não é possível excluir a estratégia, pois ela está em uso por uma ou mais sessões de teste.");
+        }
+    }
 
     @Autowired
     public EstrategiaService(EstrategiaRepository estrategiaRepository) {

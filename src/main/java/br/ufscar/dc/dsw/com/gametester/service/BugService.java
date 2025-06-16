@@ -1,8 +1,8 @@
 // src/main/java/com/gametester/service/BugService.java
 package br.ufscar.dc.dsw.com.gametester.service;
 
-import br.ufscar.dc.dsw.com.gametester.model.Bug;
-import br.ufscar.dc.dsw.com.gametester.model.SessaoTeste;
+import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
+import br.ufscar.dc.dsw.com.gametester.model.*;
 import br.ufscar.dc.dsw.com.gametester.repository.BugRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.SessaoTesteRepository; // Supondo que você criou este
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +24,36 @@ public class BugService {
         this.sessaoTesteRepository = sessaoTesteRepository;
     }
 
-    @Transactional
-    public Bug criarBug(Bug bug, Integer sessaoTesteId) {
-        // Busca a SessaoTeste para associar ao Bug
-        SessaoTeste sessao = sessaoTesteRepository.findById(sessaoTesteId)
-                .orElseThrow(() -> new RuntimeException("Sessão de Teste não encontrada com ID: " + sessaoTesteId));
-        bug.setSessaoTeste(sessao);
-        return bugRepository.save(bug); // O método save serve tanto para criar quanto para atualizar
+    // Aceita um DTO, o ID da sessão e o usuário logado.
+    public Bug criarBug(BugCreateDTO dto, Long sessaoId, Usuario usuarioLogado) {
+        // Lógica de negócio e autorização...
+        SessaoTeste sessao = sessaoTesteRepository.findById(sessaoId)
+                .orElseThrow(() -> new RuntimeException("Sessão não encontrada."));
+
+        if (!sessao.getTestador().equals(usuarioLogado) && usuarioLogado.getTipoPerfil() != TipoPerfil.ROLE_ADMINISTRADOR) {
+            throw new SecurityException("Você não tem permissão para registrar bugs para esta sessão.");
+        }
+        if (sessao.getStatus() != StatusSessao.EM_EXECUCAO) {
+            throw new IllegalStateException("Só é possível registrar bugs em sessões 'EM EXECUÇÃO'.");
+        }
+
+        // Converte o DTO para a entidade Bug ANTES de salvar
+        Bug novoBug = new Bug();
+        novoBug.setSessaoTeste(sessao);
+        novoBug.setDescricao(dto.descricao());
+        novoBug.setScreenshotUrl(dto.screenshotUrl());
+
+        // ✅ AQUI ESTÁ A CORREÇÃO:
+        // Converte a String do DTO (ex: "ALTA") para o Enum Severidade.ALTA
+        try {
+            Severidade severidadeEnum = Severidade.valueOf(dto.severidade().toUpperCase());
+            novoBug.setSeveridade(severidadeEnum);
+        } catch (IllegalArgumentException e) {
+            // Lança uma exceção se a string do DTO não for um valor válido
+            throw new RuntimeException("Severidade inválida: " + dto.severidade());
+        }
+
+        return bugRepository.save(novoBug);
     }
 
     @Transactional(readOnly = true)

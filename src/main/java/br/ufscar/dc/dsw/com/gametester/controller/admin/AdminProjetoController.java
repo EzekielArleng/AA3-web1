@@ -1,6 +1,6 @@
 package br.ufscar.dc.dsw.com.gametester.controller.admin;
 
-import br.ufscar.dc.dsw.com.gametester.model.Projeto;
+import br.ufscar.dc.dsw.com.gametester.domain.Projeto;
 import br.ufscar.dc.dsw.com.gametester.dto.ProjetoDTO;
 import br.ufscar.dc.dsw.com.gametester.service.ProjetoService;
 import jakarta.validation.Valid;

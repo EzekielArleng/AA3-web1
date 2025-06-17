@@ -1,8 +1,8 @@
 package br.ufscar.dc.dsw.com.gametester.service;
 
 import br.ufscar.dc.dsw.com.gametester.dto.ProjetoDTO;
-import br.ufscar.dc.dsw.com.gametester.model.Projeto;
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.Projeto;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.repository.ProjetoRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.UsuarioRepository; // Supondo que exista
 import org.springframework.beans.factory.annotation.Autowired;

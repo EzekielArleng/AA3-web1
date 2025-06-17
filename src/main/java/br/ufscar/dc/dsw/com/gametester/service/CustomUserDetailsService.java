@@ -1,6 +1,6 @@
 package br.ufscar.dc.dsw.com.gametester.service;
 
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

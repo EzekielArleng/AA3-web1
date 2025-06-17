@@ -1,6 +1,6 @@
 package br.ufscar.dc.dsw.com.gametester.dto;
 
-import br.ufscar.dc.dsw.com.gametester.model.StatusSessao;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.StatusSessao;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;

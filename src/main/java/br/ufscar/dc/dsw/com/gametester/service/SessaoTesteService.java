@@ -1,12 +1,12 @@
 package br.ufscar.dc.dsw.com.gametester.service;
 
 import br.ufscar.dc.dsw.com.gametester.dto.AdminSessaoEditDTO;
-import br.ufscar.dc.dsw.com.gametester.model.Estrategia;
-import br.ufscar.dc.dsw.com.gametester.model.Projeto;
-import br.ufscar.dc.dsw.com.gametester.model.SessaoTeste;
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
-import br.ufscar.dc.dsw.com.gametester.model.StatusSessao;
-import br.ufscar.dc.dsw.com.gametester.model.TipoPerfil;
+import br.ufscar.dc.dsw.com.gametester.domain.Estrategia;
+import br.ufscar.dc.dsw.com.gametester.domain.Projeto;
+import br.ufscar.dc.dsw.com.gametester.domain.SessaoTeste;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.*;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.TipoPerfil;
 import br.ufscar.dc.dsw.com.gametester.dto.SessaoCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.repository.EstrategiaRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.UsuarioRepository;
@@ -18,7 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 

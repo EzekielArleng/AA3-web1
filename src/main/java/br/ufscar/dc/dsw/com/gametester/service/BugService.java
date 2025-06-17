@@ -1,8 +1,13 @@
 // src/main/java/com/gametester/service/BugService.java
 package br.ufscar.dc.dsw.com.gametester.service;
 
+import br.ufscar.dc.dsw.com.gametester.domain.Bug;
+import br.ufscar.dc.dsw.com.gametester.domain.SessaoTeste;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.Severidade;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.StatusSessao;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.TipoPerfil;
 import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
-import br.ufscar.dc.dsw.com.gametester.model.*;
 import br.ufscar.dc.dsw.com.gametester.repository.BugRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.SessaoTesteRepository; // Supondo que você criou este
 import org.springframework.beans.factory.annotation.Autowired;

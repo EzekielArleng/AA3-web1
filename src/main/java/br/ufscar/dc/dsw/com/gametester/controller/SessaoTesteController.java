@@ -1,6 +1,6 @@
 package br.ufscar.dc.dsw.com.gametester.controller;
 
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.SessaoCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.service.*;

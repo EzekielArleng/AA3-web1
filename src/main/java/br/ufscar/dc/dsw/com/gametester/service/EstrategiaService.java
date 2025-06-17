@@ -2,7 +2,7 @@
 package br.ufscar.dc.dsw.com.gametester.service;
 
 import br.ufscar.dc.dsw.com.gametester.dto.EstrategiaDTO;
-import br.ufscar.dc.dsw.com.gametester.model.Estrategia;
+import br.ufscar.dc.dsw.com.gametester.domain.Estrategia;
 import br.ufscar.dc.dsw.com.gametester.repository.EstrategiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;

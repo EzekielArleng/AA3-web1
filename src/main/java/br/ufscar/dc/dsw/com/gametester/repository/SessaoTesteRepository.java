@@ -1,8 +1,8 @@
 package br.ufscar.dc.dsw.com.gametester.repository;
 
-import br.ufscar.dc.dsw.com.gametester.model.SessaoTeste;
-import br.ufscar.dc.dsw.com.gametester.model.StatusSessao;
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.SessaoTeste;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.StatusSessao;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

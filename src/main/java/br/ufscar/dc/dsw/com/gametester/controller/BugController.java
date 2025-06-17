@@ -2,8 +2,8 @@
 package br.ufscar.dc.dsw.com.gametester.controller;
 
 import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
-import br.ufscar.dc.dsw.com.gametester.model.Bug;
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.Bug;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.service.BugService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

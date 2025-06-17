@@ -1,6 +1,6 @@
 package br.ufscar.dc.dsw.com.gametester.repository;
 
-import br.ufscar.dc.dsw.com.gametester.model.Projeto;
+import br.ufscar.dc.dsw.com.gametester.domain.Projeto;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
 package br.ufscar.dc.dsw.com.gametester.controller.admin;
 
-import br.ufscar.dc.dsw.com.gametester.model.Estrategia;
+import br.ufscar.dc.dsw.com.gametester.domain.Estrategia;
 import br.ufscar.dc.dsw.com.gametester.dto.EstrategiaDTO;
 import br.ufscar.dc.dsw.com.gametester.service.EstrategiaService;
 import jakarta.validation.Valid;
@@ -12,91 +12,92 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/admin/estrategias")
+@RequestMapping("/admin/estrategias") // Mapeado para a mesma URL do servlet
 public class AdminEstrategiaController {
 
     @Autowired
     private EstrategiaService estrategiaService;
 
-    @GetMapping
-    public String listarEstrategias(Model model) {
-        model.addAttribute("listaEstrategias", estrategiaService.listarTodas());
-        return "admin/gerenciar-estrategias";
-    }
-
-    @GetMapping("/novo")
-    public String mostrarFormularioCadastro(Model model) {
-        model.addAttribute("estrategiaDTO", new EstrategiaDTO(null, "", "", "", "", ""));
-        return "admin/estrategia-formulario";
-    }
-
-    @PostMapping("/novo")
-    public String processarCadastro(@Valid @ModelAttribute("estrategiaDTO") EstrategiaDTO dto, BindingResult result, RedirectAttributes ra) {
-        if (result.hasErrors()) {
-            return "admin/estrategia-formulario";
-        }
-        try {
-            estrategiaService.criarEstrategia(dto);
-            ra.addFlashAttribute("mensagemSucesso", "Estratégia cadastrada com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao cadastrar estratégia: " + e.getMessage());
-        }
-        return "redirect:/admin/estrategias";
-    }
-
     /**
-     * Substitui o doGet do EditarEstrategiaServlet.
+     * Substitui o método doGet do servlet, tratando as ações via parâmetro.
      */
-    @GetMapping("/{id}/editar")
-    public String mostrarFormularioEdicao(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
+    @GetMapping
+    public String doGetActions(@RequestParam(name = "action", defaultValue = "listar") String action,
+                               @RequestParam(name = "id", required = false) Integer id,
+                               Model model, RedirectAttributes ra) {
         try {
-            Estrategia estrategia = estrategiaService.buscarPorId(id);
-
-            // Mapeia a Entidade para o DTO para preencher o formulário
-            EstrategiaDTO dto = new EstrategiaDTO(
-                    estrategia.getId(),
-                    estrategia.getNome(),
-                    estrategia.getDescricao(),
-                    estrategia.getExemplos(),
-                    estrategia.getDicas(),
-                    "" // O campo imagemPath não é relevante na edição, pois já está nos exemplos
-            );
-
-            model.addAttribute("estrategiaDTO", dto);
-
-            // Usa o mesmo template do cadastro!
-            return "admin/estrategia-formulario";
+            switch (action) {
+                case "novo":
+                    return mostrarFormularioNovaEstrategia(model);
+                case "editar":
+                    return mostrarFormularioEditarEstrategia(id, model);
+                case "excluir":
+                    return excluirEstrategia(id, ra);
+                case "listar":
+                default:
+                    return listarEstrategias(model);
+            }
         } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Estratégia não encontrada.");
+            ra.addFlashAttribute("mensagemErro", "Erro ao processar a ação: " + e.getMessage());
             return "redirect:/admin/estrategias";
         }
     }
 
     /**
-     * Substitui o doPost do EditarEstrategiaServlet.
+     * Substitui o método doPost do servlet.
      */
-    @PostMapping("/editar")
-    public String processarEdicao(@Valid @ModelAttribute("estrategiaDTO") EstrategiaDTO dto,
-                                  BindingResult result, RedirectAttributes ra) {
+    @PostMapping
+    public String doPostActions(@RequestParam(name = "action", defaultValue = "") String action,
+                                @Valid @ModelAttribute("estrategiaDTO") EstrategiaDTO dto,
+                                BindingResult result, RedirectAttributes ra, Model model) {
+        if ("salvar".equals(action)) {
+            return salvarEstrategia(dto, result, ra, model);
+        }
+        // Redireciona para a lista se a ação POST for desconhecida
+        return "redirect:/admin/estrategias";
+    }
+
+    // --- MÉTODOS PRIVADOS (Lógica interna, similar ao servlet) ---
+
+    private String listarEstrategias(Model model) {
+        model.addAttribute("listaEstrategias", estrategiaService.listarTodas());
+        return "admin/estrategia/lista"; // Aponta para lista.html
+    }
+
+    private String mostrarFormularioNovaEstrategia(Model model) {
+        model.addAttribute("estrategiaDTO", new EstrategiaDTO(null, "", "", "", "", ""));
+        model.addAttribute("action", "salvar");
+        return "admin/estrategia/formulario"; // Aponta para formulario.html
+    }
+
+    private String mostrarFormularioEditarEstrategia(Integer id, Model model) {
+        Estrategia estrategia = estrategiaService.buscarPorId(id);
+        EstrategiaDTO dto = new EstrategiaDTO(estrategia.getId(), estrategia.getNome(), estrategia.getDescricao(), estrategia.getExemplos(), estrategia.getDicas(), "");
+        model.addAttribute("estrategiaDTO", dto);
+        model.addAttribute("action", "salvar");
+        return "admin/estrategia/formulario";
+    }
+
+    private String salvarEstrategia(EstrategiaDTO dto, BindingResult result, RedirectAttributes ra, Model model) {
         if (result.hasErrors()) {
-            // Se houver erro, retorna para o mesmo formulário.
-            // O Thymeleaf irá repopular os campos e exibir os erros.
-            return "admin/estrategia-formulario";
+            model.addAttribute("action", "salvar");
+            return "admin/estrategia/formulario";
         }
         try {
-            estrategiaService.editarEstrategia(dto);
-            ra.addFlashAttribute("mensagemSucesso", "Estratégia atualizada com sucesso!");
+            if (dto.id() == null) { // Criação
+                estrategiaService.criarEstrategia(dto);
+                ra.addFlashAttribute("mensagemSucesso", "Estratégia cadastrada com sucesso!");
+            } else { // Edição
+                estrategiaService.editarEstrategia(dto);
+                ra.addFlashAttribute("mensagemSucesso", "Estratégia atualizada com sucesso!");
+            }
         } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao editar estratégia: " + e.getMessage());
+            ra.addFlashAttribute("mensagemErro", "Erro ao salvar estratégia: " + e.getMessage());
         }
         return "redirect:/admin/estrategias";
     }
 
-    /**
-     * Substitui o ExcluirEstrategiaServlet.
-     */
-    @PostMapping("/{id}/excluir")
-    public String excluirEstrategia(@PathVariable("id") Integer id, RedirectAttributes ra) {
+    private String excluirEstrategia(Integer id, RedirectAttributes ra) {
         try {
             estrategiaService.excluirEstrategia(id);
             ra.addFlashAttribute("mensagemSucesso", "Estratégia excluída com sucesso!");

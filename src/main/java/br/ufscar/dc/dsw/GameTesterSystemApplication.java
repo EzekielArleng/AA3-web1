@@ -1,15 +1,14 @@
 package br.ufscar.dc.dsw;
 
 // ... (seus imports)
-import br.ufscar.dc.dsw.com.gametester.model.*;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.TipoPerfil;
 import br.ufscar.dc.dsw.com.gametester.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.List;
 
 @SpringBootApplication
 public class GameTesterSystemApplication {

@@ -4,7 +4,7 @@ import br.ufscar.dc.dsw.com.gametester.dto.AdminUsuarioCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.AdminUsuarioEditDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.PerfilEditDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.SenhaChangeDTO;
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;

@@ -1,7 +1,7 @@
 // src/main/java/com/gametester/controller/EstrategiaController.java
 package br.ufscar.dc.dsw.com.gametester.controller;
 
-import br.ufscar.dc.dsw.com.gametester.model.Estrategia;
+import br.ufscar.dc.dsw.com.gametester.domain.Estrategia;
 import br.ufscar.dc.dsw.com.gametester.service.EstrategiaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

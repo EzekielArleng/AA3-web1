@@ -1,7 +1,7 @@
 package br.ufscar.dc.dsw.com.gametester.controller.admin;
 
-import br.ufscar.dc.dsw.com.gametester.model.Usuario;
-import br.ufscar.dc.dsw.com.gametester.model.TipoPerfil;
+import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.TipoPerfil; // Usando o Enum do pacote correto
 import br.ufscar.dc.dsw.com.gametester.dto.AdminUsuarioCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.AdminUsuarioEditDTO;
 import br.ufscar.dc.dsw.com.gametester.service.UsuarioService;
@@ -24,23 +24,20 @@ public class AdminUsuarioController {
     @GetMapping
     public String listarUsuarios(Model model) {
         model.addAttribute("listaUsuarios", usuarioService.listarTodos());
-        return "admin/gerenciar-usuarios"; // O nome do nosso novo arquivo HTML
+        return "admin/gerenciar-usuarios";
     }
+    // --- MÉTODOS DE CADASTRO (JÁ ESTAVAM CORRETOS) ---
 
-    /**
-     * Substitui o doGet do CadastrarUsuarioServlet.
-     * Exibe o formulário de criação de um novo usuário.
-     */
     @GetMapping("/novo")
     public String mostrarFormularioCadastro(Model model) {
         model.addAttribute("usuarioDTO", new AdminUsuarioCreateDTO("", "", "", "", TipoPerfil.ROLE_TESTADOR));
-        return "admin/cadastrar-usuario";
+        return "admin/cadastrar-usuario"; // Aponta para a sua view de cadastro
     }
 
-    @PostMapping
+    @PostMapping // O POST para criar é em /admin/usuarios
     public String processarCadastro(@Valid @ModelAttribute("usuarioDTO") AdminUsuarioCreateDTO dto, BindingResult result, RedirectAttributes ra) {
         if (result.hasErrors()) {
-            return "admin/cadastrar-usuario";
+            return "admin/cadastrar-usuario"; // Retorna para a view de cadastro em caso de erro
         }
         try {
             usuarioService.criarUsuarioPorAdmin(dto);
@@ -51,17 +48,19 @@ public class AdminUsuarioController {
         return "redirect:/admin/usuarios";
     }
 
-    /**
-     * Substitui o doGet do EditarUsuarioServlet.
-     * Exibe o formulário de edição para um usuário específico.
-     */
+    // --- MÉTODOS DE EDIÇÃO (CORRIGIDOS) ---
+
     @GetMapping("/{id}/editar")
     public String mostrarFormularioEdicao(@PathVariable("id") Long id, Model model, RedirectAttributes ra) {
         try {
             Usuario usuario = usuarioService.buscarPorId(id);
-            // Mapeia a Entidade para o DTO para preencher o formulário
-            AdminUsuarioEditDTO dto = new AdminUsuarioEditDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), "", "", usuario.getTipoPerfil());
+            AdminUsuarioEditDTO dto = new AdminUsuarioEditDTO(
+                    usuario.getId(), usuario.getNome(), usuario.getEmail(),
+                    "", "", usuario.getTipoPerfil()
+            );
             model.addAttribute("usuarioDTO", dto);
+
+            // ✅ CORREÇÃO: Aponta para a view de EDIÇÃO específica
             return "admin/editar-usuario";
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Usuário não encontrado.");
@@ -69,13 +68,13 @@ public class AdminUsuarioController {
         }
     }
 
-    /**
-     * Substitui o doPost do EditarUsuarioServlet.
-     * Processa a atualização do usuário.
-     */
     @PostMapping("/editar")
-    public String processarEdicao(@Valid @ModelAttribute("usuarioDTO") AdminUsuarioEditDTO dto, BindingResult result, RedirectAttributes ra) {
+    public String processarEdicao(@Valid @ModelAttribute("usuarioDTO") AdminUsuarioEditDTO dto,
+                                  BindingResult result, RedirectAttributes ra, Model model) { // Adicionamos Model
         if (result.hasErrors()) {
+            // ✅ CORREÇÃO: Retorna para a view de EDIÇÃO específica
+            // Precisamos adicionar o DTO de volta ao modelo para repopular os campos
+            model.addAttribute("usuarioDTO", dto);
             return "admin/editar-usuario";
         }
         try {
@@ -87,10 +86,6 @@ public class AdminUsuarioController {
         return "redirect:/admin/usuarios";
     }
 
-    /**
-     * Substitui o ExcluirUsuarioServlet.
-     * Processa a exclusão de um usuário.
-     */
     @PostMapping("/{id}/excluir")
     public String excluirUsuario(@PathVariable("id") Long id, @AuthenticationPrincipal Usuario adminLogado, RedirectAttributes ra) {
         try {

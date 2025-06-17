@@ -1,6 +1,6 @@
 package br.ufscar.dc.dsw.com.gametester.dto;
 
-import br.ufscar.dc.dsw.com.gametester.model.TipoPerfil;
+import br.ufscar.dc.dsw.com.gametester.domain.enums.TipoPerfil;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

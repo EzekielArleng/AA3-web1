@@ -140,9 +140,8 @@
 			<version>6.5.0</version>
 		</dependency>
 		<dependency>
-			<groupId>br.ufscar.dc.dsw</groupId>
-			<artifactId>gametester-system</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
 		</dependency>
 	</dependencies>
 

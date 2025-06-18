@@ -8,19 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/admin/estrategias") // Mapeado para a mesma URL do servlet
+@RequestMapping("/admin/estrategias")
 public class AdminEstrategiaController {
 
     @Autowired
     private EstrategiaService estrategiaService;
 
-    /**
-     * Substitui o método doGet do servlet, tratando as ações via parâmetro.
-     */
     @GetMapping
     public String doGetActions(@RequestParam(name = "action", defaultValue = "listar") String action,
                                @RequestParam(name = "id", required = false) Integer id,
@@ -39,13 +40,11 @@ public class AdminEstrategiaController {
             }
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao processar a ação: " + e.getMessage());
-            return "redirect:/admin/estrategias";
+            // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
+            return "redirect:/admin/estrategias?action=listar";
         }
     }
 
-    /**
-     * Substitui o método doPost do servlet.
-     */
     @PostMapping
     public String doPostActions(@RequestParam(name = "action", defaultValue = "") String action,
                                 @Valid @ModelAttribute("estrategiaDTO") EstrategiaDTO dto,
@@ -53,21 +52,21 @@ public class AdminEstrategiaController {
         if ("salvar".equals(action)) {
             return salvarEstrategia(dto, result, ra, model);
         }
-        // Redireciona para a lista se a ação POST for desconhecida
-        return "redirect:/admin/estrategias";
+        // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
+        return "redirect:/admin/estrategias?action=listar";
     }
 
-    // --- MÉTODOS PRIVADOS (Lógica interna, similar ao servlet) ---
+    // --- MÉTODOS PRIVADOS ---
 
     private String listarEstrategias(Model model) {
         model.addAttribute("listaEstrategias", estrategiaService.listarTodas());
-        return "admin/estrategia/lista"; // Aponta para lista.html
+        return "admin/estrategia/lista";
     }
 
     private String mostrarFormularioNovaEstrategia(Model model) {
         model.addAttribute("estrategiaDTO", new EstrategiaDTO(null, "", "", "", "", ""));
         model.addAttribute("action", "salvar");
-        return "admin/estrategia/formulario"; // Aponta para formulario.html
+        return "admin/estrategia/formulario";
     }
 
     private String mostrarFormularioEditarEstrategia(Integer id, Model model) {
@@ -84,17 +83,18 @@ public class AdminEstrategiaController {
             return "admin/estrategia/formulario";
         }
         try {
-            if (dto.id() == null) { // Criação
+            if (dto.id() == null) {
                 estrategiaService.criarEstrategia(dto);
                 ra.addFlashAttribute("mensagemSucesso", "Estratégia cadastrada com sucesso!");
-            } else { // Edição
+            } else {
                 estrategiaService.editarEstrategia(dto);
                 ra.addFlashAttribute("mensagemSucesso", "Estratégia atualizada com sucesso!");
             }
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao salvar estratégia: " + e.getMessage());
         }
-        return "redirect:/admin/estrategias";
+        // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
+        return "redirect:/admin/estrategias?action=listar";
     }
 
     private String excluirEstrategia(Integer id, RedirectAttributes ra) {
@@ -104,6 +104,7 @@ public class AdminEstrategiaController {
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao excluir estratégia: " + e.getMessage());
         }
-        return "redirect:/admin/estrategias";
+        // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
+        return "redirect:/admin/estrategias?action=listar";
     }
 }

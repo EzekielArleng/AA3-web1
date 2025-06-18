@@ -35,10 +35,12 @@ public class SessaoTesteService {
      * Garante que o testador logado é membro do projeto.
      */
     public SessaoTeste criarSessao(SessaoCreateDTO dto, Usuario testador) {
+
         Projeto projeto = projetoRepository.findById(dto.projetoId())
                 .orElseThrow(() -> new RuntimeException("Projeto não encontrado."));
         Estrategia estrategia = estrategiaRepository.findById(dto.estrategiaId())
                 .orElseThrow(() -> new RuntimeException("Estratégia não encontrada."));
+
 
         // Regra de autorização: o testador é membro do projeto?
         if (projeto.getMembros().stream().noneMatch(membro -> membro.equals(testador))) {

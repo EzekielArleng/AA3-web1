@@ -91,7 +91,7 @@ public class TestadorDashboardController {
             return "testador/sessoes-por-projeto";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", e.getMessage());
-            return "redirect:/testador/meus-projetos";
+            return "redirect:/testador/minhas-sessoes";
         }
     }
 }

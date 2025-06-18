@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Detalhes da Estratégia - ' + ${estrategiaDetalhes.nome}">Detalhes da Estratégia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilo para preservar as quebras de linha nos campos de texto */
+        .details-block { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+<div class="container mt-4" style="max-width: 800px;">
+
+    <div th:if="${estrategiaDetalhes}">
+        <h1 th:text="${estrategiaDetalhes.nome}">Nome da Estratégia</h1>
+        <p class="text-muted"><em>ID: <span th:text="${estrategiaDetalhes.id}"></span></em></p>
+
+        <h2 class="mt-4">Descrição</h2>
+        <div class="details-block card card-body bg-light">
+            <p th:text="${estrategiaDetalhes.descricao}"></p>
+        </div>
+
+        <h2 class="mt-4">Exemplos</h2>
+        <div class="details-block card card-body bg-light">
+            <p th:text="${estrategiaDetalhes.exemplos}"></p>
+        </div>
+
+        <h2 class="mt-4">Dicas</h2>
+        <div class="details-block card card-body bg-light">
+            <p th:text="${estrategiaDetalhes.dicas}"></p>
+        </div>
+    </div>
+
+    <div th:if="${mensagemErro}" class="alert alert-danger" th:text="${mensagemErro}"></div>
+
+    <div class="mt-4 text-center">
+        <a th:href="@{/templates/estrategias}" class="btn btn-primary">Ver Todas as Estratégias</a>
+    </div>
+</div>
+</body>
+</html>

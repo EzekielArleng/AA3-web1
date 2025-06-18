@@ -41,7 +41,7 @@ public class AdminProjetoController {
     @GetMapping("/novo")
     public String mostrarFormularioCadastro(Model model) {
         model.addAttribute("projetoDTO", new ProjetoDTO(null, "", ""));
-        return "admin/projeto-formulario";
+        return "admin/cadastrar-projeto";
     }
 
     /**
@@ -50,7 +50,7 @@ public class AdminProjetoController {
     @PostMapping("/novo")
     public String processarCadastro(@Valid @ModelAttribute("projetoDTO") ProjetoDTO dto, BindingResult result, RedirectAttributes ra) {
         if (result.hasErrors()) {
-            return "admin/projeto-formulario";
+            return "admin/cadastrar-projeto";
         }
         try {
             projetoService.criarProjeto(dto);
@@ -69,7 +69,7 @@ public class AdminProjetoController {
         try {
             Projeto projeto = projetoService.buscarPorId(id);
             model.addAttribute("projetoDTO", new ProjetoDTO(projeto.getId(), projeto.getNome(), projeto.getDescricao()));
-            return "admin/projeto-formulario"; // Reutiliza a mesma view
+            return "admin/cadastrar-projeto"; // Reutiliza a mesma view
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Projeto não encontrado.");
             return "redirect:/admin/projetos";
@@ -83,7 +83,7 @@ public class AdminProjetoController {
     public String processarEdicao(@Valid @ModelAttribute("projetoDTO") ProjetoDTO dto, BindingResult result, RedirectAttributes ra) {
         if (result.hasErrors()) {
             // Se houver erro, o ID já está no DTO, então a view saberá que é uma edição
-            return "admin/projeto-formulario";
+            return "admin/cadastrar-projeto";
         }
         try {
             projetoService.editarProjeto(dto);

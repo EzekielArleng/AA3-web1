@@ -1,54 +1,78 @@
 <!DOCTYPE html>
-<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Minhas Sessões de Teste</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/estiloPrincipal.css}">
 </head>
 <body>
 <div class="container mt-4">
-    <h2>Minhas Sessões de Teste</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Minhas Sessões de Teste</h2>
+        <a th:href="@{/testador/sessoes/nova}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nova Sessão
+        </a>
+    </div>
 
     <div th:if="${mensagemSucesso}" class="alert alert-success" role="alert" th:text="${mensagemSucesso}"></div>
     <div th:if="${mensagemErro}" class="alert alert-danger" role="alert" th:text="${mensagemErro}"></div>
 
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Projeto</th>
-            <th>Estratégia</th>
-            <th>Status</th>
-            <th>Ações</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="sessao : ${listaMinhasSessoes}">
-            <td th:text="${sessao.id}">1</td>
-            <td th:text="${sessao.projeto.nome}">Nome do Projeto</td>
-            <td th:text="${sessao.estrategia.nome}">Nome da Estratégia</td>
-            <td>
-                    <span th:text="${sessao.status.name()}"
-                          th:classappend="${sessao.status.name() == 'CRIADO'} ? 'badge bg-primary' :
-                                         (${sessao.status.name() == 'EM_EXECUCAO'} ? 'badge bg-warning' : 'badge bg-secondary')">
-                        STATUS
-                    </span>
-            </td>
-            <td>
-                <div th:if="${sessao.status.name() == 'CRIADO'}">
-                    <form th:action="@{/testador/sessoes/{id}/iniciar(id=${sessao.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-success btn-sm">Iniciar</button>
-                    </form>
-                </div>
+    <div th:if="${not #lists.isEmpty(listaMinhasSessoes)}">
+        <table class="table table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Projeto</th>
+                <th>Estratégia</th>
+                <th>Status</th>
+                <th style="width: 20%;">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sessao : ${listaMinhasSessoes}">
+                <td th:text="${sessao.id}">1</td>
+                <td th:text="${sessao.projeto.nome}">Nome do Projeto</td>
+                <td th:text="${sessao.estrategia.nome}">Nome da Estratégia</td>
+                <td>
+                        <span th:text="${sessao.status.name()}"
+                              th:classappend="${sessao.status.name() == 'CRIADO'} ? 'badge bg-primary' :
+                                             (${sessao.status.name() == 'EM_EXECUCAO'} ? 'badge bg-warning text-dark' : 'badge bg-success')">
+                            STATUS
+                        </span>
+                </td>
+                <td>
+                    <div th:if="${sessao.status.name() == 'CRIADO'}">
+                        <form th:action="@{/testador/sessoes/{id}/iniciar(id=${sessao.id})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm">Iniciar</button>
+                        </form>
+                        <a th:href="@{/testador/sessoes/{id}/editar(id=${sessao.id})}" class="btn btn-warning btn-sm">Editar</a>
+                    </div>
 
-                <div th:if="${sessao.status.name() == 'EM_EXECUCAO'}">
-                    <form th:action="@{/testador/sessoes/{id}/finalizar(id=${sessao.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger btn-sm">Finalizar</button>
-                    </form>
-                    <a th:href="@{/testador/sessoes/{id}(id=${sessao.id})}" class="btn btn-primary btn-sm">Ver Detalhes</a>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+                    <div th:if="${sessao.status.name() == 'EM_EXECUCAO'}">
+                        <form th:action="@{/testador/sessoes/{id}/finalizar(id=${sessao.id})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Finalizar</button>
+                        </form>
+                        <a th:href="@{/testador/sessoes/{id}(id=${sessao.id})}" class="btn btn-info btn-sm">Detalhes</a>
+                    </div>
+
+                    <div th:if="${sessao.status.name() == 'FINALIZADO'}">
+                        <a th:href="@{/testador/sessoes/{id}(id=${sessao.id})}" class="btn btn-secondary btn-sm">Ver Relatório</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${#lists.isEmpty(listaMinhasSessoes)}" class="alert alert-info text-center">
+        Você ainda não cadastrou nenhuma sessão de teste.
+    </div>
+
+    <div class="mt-4">
+        <a th:href="@{/testador/dashboard}" class="btn btn-secondary">Voltar ao Painel</a>
+    </div>
 </div>
 </body>
 </html>

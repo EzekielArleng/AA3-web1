@@ -63,13 +63,13 @@ public class TestadorDashboardController {
      * Exibe a página "Minhas Sessões".
      * URL: /testador/sessoes
      */
-    @GetMapping("/sessoes")
+    /*@GetMapping("/sessoes")
     public String mostrarMinhasSessoes(@AuthenticationPrincipal Usuario usuarioLogado, Model model) {
         List<SessaoTeste> sessoes = sessaoTesteService.listarSessoesPorTestador(usuarioLogado);
         model.addAttribute("listaMinhasSessoes", sessoes);
         return "testador/minhas-sessoes";
     }
-
+*/
     /**
      * Exibe as sessões de um projeto específico.
      * URL: /testador/projetos/{id}/sessoes

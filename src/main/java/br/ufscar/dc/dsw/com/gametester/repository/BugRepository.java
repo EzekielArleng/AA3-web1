@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface BugRepository extends JpaRepository<Bug, Integer> {
-    List<Bug> findBySessaoTesteIdOrderByDataRegistroAsc(Integer id);
+    List<Bug> findBySessaoTesteIdOrderByDataRegistroAsc(Long sessaoTeste_id);
 }

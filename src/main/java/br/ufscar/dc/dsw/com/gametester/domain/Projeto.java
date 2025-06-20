@@ -3,6 +3,7 @@ package br.ufscar.dc.dsw.com.gametester.domain;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.Set;
 @Table(name = "projetos")
 public class Projeto implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

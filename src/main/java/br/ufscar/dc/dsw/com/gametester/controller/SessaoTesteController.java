@@ -37,7 +37,6 @@ public class SessaoTesteController {
     public String listarMinhasSessoes(@AuthenticationPrincipal Usuario testador, Model model) {
         List<SessaoTeste> sessoes = sessaoTesteService.listarSessoesPorTestador(testador);
         model.addAttribute("listaMinhasSessoes", sessoes);
-        // ✅ CORREÇÃO: Aponta para o arquivo /templates/testador/minhas-sessoes.html
         return "testador/minhas-sessoes";
     }
 
@@ -72,7 +71,6 @@ public class SessaoTesteController {
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao criar sessão: " + e.getMessage());
         }
-        // ✅ CORREÇÃO: Redireciona para a URL de listagem
         return "redirect:/testador/sessoes";
     }
 
@@ -88,7 +86,6 @@ public class SessaoTesteController {
             return "redirect:/testador/sessoes/" + sessaoId;
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao iniciar sessão: " + e.getMessage());
-            // ✅ CORREÇÃO: Redireciona para a URL de listagem
             return "redirect:/testador/sessoes";
         }
     }
@@ -105,7 +102,6 @@ public class SessaoTesteController {
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao finalizar sessão: " + e.getMessage());
         }
-        // ✅ CORREÇÃO: Redireciona para a URL de listagem
         return "redirect:/testador/sessoes";
     }
 
@@ -121,7 +117,6 @@ public class SessaoTesteController {
             return "testador/sessao/sessao-detalhe";
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", e.getMessage());
-            // ✅ CORREÇÃO: Redireciona para a URL de listagem
             return "redirect:/testador/sessoes";
         }
     }

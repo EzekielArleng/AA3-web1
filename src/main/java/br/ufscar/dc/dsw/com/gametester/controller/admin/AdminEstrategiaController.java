@@ -40,7 +40,6 @@ public class AdminEstrategiaController {
             }
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao processar a ação: " + e.getMessage());
-            // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
             return "redirect:/admin/estrategias?action=listar";
         }
     }
@@ -52,7 +51,6 @@ public class AdminEstrategiaController {
         if ("salvar".equals(action)) {
             return salvarEstrategia(dto, result, ra, model);
         }
-        // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
         return "redirect:/admin/estrategias?action=listar";
     }
 
@@ -93,7 +91,6 @@ public class AdminEstrategiaController {
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao salvar estratégia: " + e.getMessage());
         }
-        // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
         return "redirect:/admin/estrategias?action=listar";
     }
 
@@ -104,7 +101,6 @@ public class AdminEstrategiaController {
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Erro ao excluir estratégia: " + e.getMessage());
         }
-        // ✅ CORREÇÃO: Redireciona para a ação de listar explicitamente
         return "redirect:/admin/estrategias?action=listar";
     }
 }

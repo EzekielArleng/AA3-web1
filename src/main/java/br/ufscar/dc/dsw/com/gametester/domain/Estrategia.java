@@ -1,12 +1,15 @@
 package br.ufscar.dc.dsw.com.gametester.domain;
 
 import jakarta.persistence.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "estrategias")
 public class Estrategia implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

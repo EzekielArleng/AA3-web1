@@ -67,7 +67,7 @@ public class BugService {
     }
 
     @Transactional(readOnly = true)
-    public List<Bug> listarBugsPorSessao(Integer sessaoTesteId) {
+    public List<Bug> listarBugsPorSessao(Long sessaoTesteId) {
         return bugRepository.findBySessaoTesteIdOrderByDataRegistroAsc(sessaoTesteId);
     }
 

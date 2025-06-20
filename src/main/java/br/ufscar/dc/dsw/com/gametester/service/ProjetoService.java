@@ -79,7 +79,6 @@ public class ProjetoService {
         if (usuario == null) {
             return Collections.emptyList(); // Retorna lista vazia se o usuário for nulo
         }
-        // A mágica acontece aqui: pegamos o ID do objeto e passamos para o repositório.
         return projetoRepository.findByMembros_Id(usuario.getId(), sort);
     }
 

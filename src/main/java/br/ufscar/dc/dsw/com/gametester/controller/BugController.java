@@ -5,20 +5,24 @@ import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.domain.Bug;
 import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.service.BugService;
+import br.ufscar.dc.dsw.com.gametester.service.SessaoTesteService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
 @Controller
-@RequestMapping("/sessoes/{sessaoId}/bugs") // Rotas aninhadas para bugs dentro de uma sessão
+@RequestMapping("/testador/sessoes/{sessaoId}/bugs")
 public class BugController {
 
     private final BugService bugService;
+    @Autowired private SessaoTesteService sessaoTesteService;
 
     @Autowired
     public BugController(BugService bugService) {
@@ -27,7 +31,7 @@ public class BugController {
 
     // Exibe a lista de bugs de uma sessão
     @GetMapping
-    public String listarBugs(@PathVariable Integer sessaoId, Model model) {
+    public String listarBugs(@PathVariable Long sessaoId, Model model) {
         List<Bug> bugs = bugService.listarBugsPorSessao(sessaoId);
         model.addAttribute("bugs", bugs);
         model.addAttribute("sessaoId", sessaoId);
@@ -36,18 +40,32 @@ public class BugController {
 
     // Exibe o formulário para criar um novo bug
     @GetMapping("/novo")
-    public String mostrarFormularioDeCriacao(@PathVariable Integer sessaoId, Model model) {
-        model.addAttribute("bug", new Bug());
-        model.addAttribute("sessaoId", sessaoId);
-        return "bug/formulario"; // Renderiza o arquivo templates/bug/formulario.html
+    public String mostrarFormularioDeCriacao(@PathVariable Long sessaoId, Model model) {
+        model.addAttribute("sessao", sessaoTesteService.buscarPorId(sessaoId));
+        model.addAttribute("bugDTO", new BugCreateDTO("", "", ""));
+        return "testador/bug/formulario"; // Aponta para um formulário de bug específico
     }
 
     // Processa o envio do formulário de criação
-    @PostMapping
-    public String criarBug(@PathVariable Long sessaoId, BugCreateDTO bug, @AuthenticationPrincipal Usuario usuarioLogado, RedirectAttributes redirectAttributes) {
-        bugService.criarBug(bug, sessaoId, usuarioLogado);
-        redirectAttributes.addFlashAttribute("mensagem", "Bug registrado com sucesso!");
-        return "redirect:/sessoes/" + sessaoId + "/bugs";
+    @PostMapping("/novo")
+    public String criarBug(@PathVariable Long sessaoId,
+                           @Valid @ModelAttribute("bugDTO") BugCreateDTO dto,
+                           BindingResult result,
+                           @AuthenticationPrincipal Usuario usuarioLogado,
+                           RedirectAttributes redirectAttributes,
+                           Model model) {
+
+        if (result.hasErrors()) {
+            model.addAttribute("sessao", sessaoTesteService.buscarPorId(sessaoId));
+            return "testador/bug/formulario";
+        }
+        try {
+            bugService.criarBug(dto, sessaoId, usuarioLogado);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Bug registrado com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao registrar bug: " + e.getMessage());
+        }
+        return "redirect:/testador/sessoes/" + sessaoId;
     }
 
     // Deleta um bug

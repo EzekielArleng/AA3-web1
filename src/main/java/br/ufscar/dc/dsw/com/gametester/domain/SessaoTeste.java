@@ -4,6 +4,7 @@ import br.ufscar.dc.dsw.com.gametester.domain.enums.StatusSessao;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,11 +12,12 @@ import java.util.List;
 @Entity
 @Table(name = "sessoes_teste")
 public class SessaoTeste implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "projeto_id")
@@ -56,8 +58,8 @@ public class SessaoTeste implements Serializable {
     }
 
     // Getters e Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public Projeto getProjeto() { return projeto; }
     public void setProjeto(Projeto projeto) { this.projeto = projeto; }

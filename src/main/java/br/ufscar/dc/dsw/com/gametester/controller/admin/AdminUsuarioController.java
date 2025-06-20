@@ -26,7 +26,7 @@ public class AdminUsuarioController {
         model.addAttribute("listaUsuarios", usuarioService.listarTodos());
         return "admin/gerenciar-usuarios";
     }
-    // --- MÉTODOS DE CADASTRO (JÁ ESTAVAM CORRETOS) ---
+    // --- MÉTODOS DE CADASTRO ---
 
     @GetMapping("/novo")
     public String mostrarFormularioCadastro(Model model) {
@@ -60,7 +60,6 @@ public class AdminUsuarioController {
             );
             model.addAttribute("usuarioDTO", dto);
 
-            // ✅ CORREÇÃO: Aponta para a view de EDIÇÃO específica
             return "admin/editar-usuario";
         } catch (Exception e) {
             ra.addFlashAttribute("mensagemErro", "Usuário não encontrado.");
@@ -72,7 +71,6 @@ public class AdminUsuarioController {
     public String processarEdicao(@Valid @ModelAttribute("usuarioDTO") AdminUsuarioEditDTO dto,
                                   BindingResult result, RedirectAttributes ra, Model model) { // Adicionamos Model
         if (result.hasErrors()) {
-            // ✅ CORREÇÃO: Retorna para a view de EDIÇÃO específica
             // Precisamos adicionar o DTO de volta ao modelo para repopular os campos
             model.addAttribute("usuarioDTO", dto);
             return "admin/editar-usuario";

@@ -9,7 +9,5 @@ public record ProjetoDTO(
         @NotBlank(message = "O nome do projeto é obrigatório.")
         @Size(min = 3, message = "O nome do projeto deve ter no mínimo 3 caracteres.")
         String nome,
-
-        // Descrição é opcional, então não precisa de validação
         String descricao
 ) {}

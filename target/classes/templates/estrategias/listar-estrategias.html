@@ -39,6 +39,7 @@
     <div class="mt-4 text-center">
         <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMINISTRADOR')" class="btn btn-secondary">Voltar ao Painel do Admin</a>
         <a th:href="@{/}" class="btn btn-primary">Página Inicial</a>
+        <a th:href="@{/testador/dashboard}" sec:authorize="hasRole('TESTADOR')" class="btn btn-secondary">Voltar ao Painel do Tester</a>
     </div>
 </div>
 </body>

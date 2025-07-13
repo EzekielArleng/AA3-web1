@@ -8,6 +8,8 @@ import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.domain.enums.*;
 import br.ufscar.dc.dsw.com.gametester.domain.enums.TipoPerfil;
 import br.ufscar.dc.dsw.com.gametester.dto.SessaoCreateDTO;
+import br.ufscar.dc.dsw.com.gametester.exception.InvalidDataException;
+import br.ufscar.dc.dsw.com.gametester.exception.ResourceNotFoundException;
 import br.ufscar.dc.dsw.com.gametester.repository.EstrategiaRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.UsuarioRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.ProjetoRepository;
@@ -143,16 +145,17 @@ public class SessaoTesteService {
         // Retorna todas as sessões, ordenadas pela mais recente primeiro
         return sessaoTesteRepository.findAll(Sort.by(Sort.Direction.DESC, "dataHoraCriacao"));
     }
-
     public SessaoTeste editarSessaoPorAdmin(AdminSessaoEditDTO dto) {
-        // Busca as entidades relacionadas
+        // Busca a entidade principal (já lança ResourceNotFoundException se não encontrar)
         SessaoTeste sessao = buscarPorId(dto.id());
+
+        // Busca as entidades relacionadas usando a exceção correta
         Projeto projeto = projetoRepository.findById(dto.projetoId())
-                .orElseThrow(() -> new RuntimeException("Projeto não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Projeto com ID " + dto.projetoId() + " não encontrado."));
         Usuario testador = usuarioRepository.findById(dto.testadorId())
-                .orElseThrow(() -> new RuntimeException("Testador não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Testador com ID " + dto.testadorId() + " não encontrado."));
         Estrategia estrategia = estrategiaRepository.findById(dto.estrategiaId())
-                .orElseThrow(() -> new RuntimeException("Estratégia não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Estratégia com ID " + dto.estrategiaId() + " não encontrada."));
 
         // Atualiza os campos na entidade
         sessao.setProjeto(projeto);
@@ -164,29 +167,26 @@ public class SessaoTesteService {
         sessao.setDataHoraInicio(dto.dataHoraInicio());
         sessao.setDataHoraFim(dto.dataHoraFim());
 
-        // **Lógica de negócio que estava no Servlet, agora no Service**
+        // Valida as regras de negócio usando a exceção correta
         if (sessao.getDataHoraInicio() != null && sessao.getDataHoraFim() != null && sessao.getDataHoraFim().isBefore(sessao.getDataHoraInicio())) {
-            throw new IllegalArgumentException("A Data/Hora Fim não pode ser anterior à Data/Hora Início.");
+            throw new InvalidDataException("A Data/Hora Fim não pode ser anterior à Data/Hora Início.");
         }
         if (sessao.getStatus() == StatusSessao.EM_EXECUCAO && sessao.getDataHoraInicio() == null) {
-            throw new IllegalArgumentException("Uma sessão EM EXECUÇÃO precisa de uma Data/Hora de Início.");
+            throw new InvalidDataException("Uma sessão EM EXECUÇÃO precisa de uma Data/Hora de Início.");
         }
         if (sessao.getStatus() == StatusSessao.FINALIZADO && (sessao.getDataHoraInicio() == null || sessao.getDataHoraFim() == null)) {
-            throw new IllegalArgumentException("Uma sessão FINALIZADA precisa de Data/Hora de Início e Fim.");
+            throw new InvalidDataException("Uma sessão FINALIZADA precisa de Data/Hora de Início e Fim.");
         }
 
         return sessaoTesteRepository.save(sessao);
     }
 
+
     public void excluirSessao(Long id) {
         if (!sessaoTesteRepository.existsById(id)) {
-            throw new RuntimeException("Sessão não encontrada para exclusão. ID: " + id);
+            throw new ResourceNotFoundException("Sessão não encontrada. ID: " + id);
         }
-        try {
-            sessaoTesteRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Não é possível excluir a sessão, pois ela possui bugs registrados.");
-        }
+        sessaoTesteRepository.deleteById(id);
     }
 
     /**

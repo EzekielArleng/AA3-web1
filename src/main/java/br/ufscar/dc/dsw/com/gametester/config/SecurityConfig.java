@@ -1,61 +1,55 @@
-package br.ufscar.dc.dsw.com.gametester.config; // Ou o pacote de configuração do seu projeto
+package br.ufscar.dc.dsw.com.gametester.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration // 1. Diz ao Spring que esta é uma classe de configuração
-@EnableWebSecurity // 2. Habilita a configuração de segurança web do Spring
+@Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
-    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private SecurityFilter securityFilter; // Injeta nosso novo filtro
 
-    /**
-     * Este método, anotado com @Bean, age como uma "fábrica".
-     * Ele cria uma instância de BCryptPasswordEncoder e a registra no contêiner do Spring
-     * sob o tipo "PasswordEncoder".
-     *
-     * Agora, quando o UsuarioService pedir um PasswordEncoder, o Spring saberá
-     * como criar e fornecer um.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     *
-     * Em versões modernas do Spring Security, é obrigatório definir um
-     * SecurityFilterChain. Sem isso, a aplicação pode não iniciar corretamente.
-     * Este é um exemplo básico que libera todos os endpoints.
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        return http
+                .csrf(csrf -> csrf.disable()) // 1. Desabilita CSRF
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 2. Define a política de sessão como STATELESS
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/testador/**").hasAnyRole("TESTADOR", "ADMINISTRADOR")
-                        .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
-                        .anyRequest().authenticated()
+                        // 3. Define permissões para os endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/login").permitAll() // Endpoint de login é público
+                        .requestMatchers(HttpMethod.GET, "/api/estrategias/**").permitAll() // Exemplo: estratégias públicas
+                        .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/testador/**").hasAnyRole("TESTADOR", "ADMINISTRADOR")
+                        .anyRequest().authenticated() // Todas as outras requisições precisam de autenticação
                 )
-                .formLogin(form -> form
-                        .loginPage("/login") // 1. Diz ao Spring qual é a sua página de login
-                        .successHandler(customAuthenticationSuccessHandler)
-                        .permitAll() // 3. Permite que todos acessem a URL de login
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout") // Para onde ir após o logout
-                        .permitAll()
-                );
+                // 4. Adiciona nosso filtro customizado para rodar antes do filtro padrão do Spring
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
 
-        return http.build();
+    /**
+     * Expõe o AuthenticationManager como um Bean para que possamos injetá-lo
+     * em nosso AuthenticationController para processar o login.
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 }

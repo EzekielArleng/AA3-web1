@@ -8,6 +8,8 @@ import br.ufscar.dc.dsw.com.gametester.domain.enums.Severidade;
 import br.ufscar.dc.dsw.com.gametester.domain.enums.StatusSessao;
 import br.ufscar.dc.dsw.com.gametester.domain.enums.TipoPerfil;
 import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
+import br.ufscar.dc.dsw.com.gametester.exception.AuthorizationException;
+import br.ufscar.dc.dsw.com.gametester.exception.ResourceNotFoundException;
 import br.ufscar.dc.dsw.com.gametester.repository.BugRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.SessaoTesteRepository; // Supondo que você criou este
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +61,12 @@ public class BugService {
         return bugRepository.save(novoBug);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Bug> buscarPorId(Integer id) {
-        return bugRepository.findById(id);
-    }
 
+    @Transactional(readOnly = true)
+    public Bug buscarPorId(Integer id) {
+        return bugRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bug não encontrado com ID: " + id));
+    }
     @Transactional(readOnly = true)
     public List<Bug> listarBugsPorSessao(Long sessaoTesteId) {
         return bugRepository.findBySessaoTesteIdOrderByDataRegistroAsc(sessaoTesteId);
@@ -80,12 +83,13 @@ public class BugService {
 
         return bugRepository.save(bugExistente);
     }
-
     @Transactional
-    public void deletarBug(Integer id) {
-        if (!bugRepository.existsById(id)) {
-            throw new RuntimeException("Bug não encontrado com ID: " + id);
+    public void deletarBug(Integer bugId, Usuario usuarioLogado) {
+        Bug bug = bugRepository.findById(bugId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bug não encontrado com ID: " + bugId));
+        if (!bug.getSessaoTeste().getTestador().getId().equals(usuarioLogado.getId())) {
+            throw new AuthorizationException("Você não tem permissão para excluir este bug.");
         }
-        bugRepository.deleteById(id);
+        bugRepository.deleteById(bugId);
     }
 }

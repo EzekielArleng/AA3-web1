@@ -3,6 +3,7 @@ package br.ufscar.dc.dsw.com.gametester.service;
 
 import br.ufscar.dc.dsw.com.gametester.dto.EstrategiaDTO;
 import br.ufscar.dc.dsw.com.gametester.domain.Estrategia;
+import br.ufscar.dc.dsw.com.gametester.exception.ResourceNotFoundException;
 import br.ufscar.dc.dsw.com.gametester.repository.EstrategiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,7 +75,7 @@ public class EstrategiaService {
     @Transactional(readOnly = true)
     public Estrategia buscarPorId(Integer id) {
         return estrategiaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Estratégia não encontrada para o ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Estratégia não encontrada com o ID: " + id));
     }
 
     public Estrategia salvar(Estrategia estrategia) {

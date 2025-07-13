@@ -4,6 +4,7 @@ import br.ufscar.dc.dsw.com.gametester.domain.enums.Severidade;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bugs")
@@ -28,7 +29,7 @@ public class Bug implements Serializable {
     private Severidade severidade;
 
     @Column(name = "data_registro")
-    private Timestamp dataRegistro;
+    private LocalDateTime dataRegistro;
 
     @Column(name = "screenshot_url")
     private String screenshotUrl;

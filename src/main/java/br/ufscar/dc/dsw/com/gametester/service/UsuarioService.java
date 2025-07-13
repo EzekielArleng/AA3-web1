@@ -5,6 +5,9 @@ import br.ufscar.dc.dsw.com.gametester.dto.AdminUsuarioEditDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.PerfilEditDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.SenhaChangeDTO;
 import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
+import br.ufscar.dc.dsw.com.gametester.exception.DataConflictException;
+import br.ufscar.dc.dsw.com.gametester.exception.InvalidDataException;
+import br.ufscar.dc.dsw.com.gametester.exception.ResourceNotFoundException;
 import br.ufscar.dc.dsw.com.gametester.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,7 +34,7 @@ public class UsuarioService {
      */
     public Usuario registrar(Usuario usuario) {
         if (usuarioRepository.existsByEmailIgnoreCase(usuario.getEmail())) {
-            throw new RuntimeException("Erro: O e-mail '" + usuario.getEmail() + "' já está cadastrado.");
+            throw new DataConflictException("Erro: O e-mail '" + usuario.getEmail() + "' já está cadastrado.");
         }
 
         // **LÓGICA DE SEGURANÇA CENTRALIZADA**
@@ -44,7 +47,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public Usuario buscarPorId(Long id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado. ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado. ID: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -59,10 +62,10 @@ public class UsuarioService {
 
     public Usuario criarUsuarioPorAdmin(AdminUsuarioCreateDTO dto) {
         if (!dto.senha().equals(dto.confirmaSenha())) {
-            throw new RuntimeException("As senhas não coincidem.");
+            throw new InvalidDataException("As senhas não coincidem.");
         }
         if (usuarioRepository.existsByEmailIgnoreCase(dto.email())) {
-            throw new RuntimeException("O e-mail '" + dto.email() + "' já está cadastrado.");
+            throw new DataConflictException("O e-mail '" + dto.email() + "' já está cadastrado.");
         }
 
         Usuario novoUsuario = new Usuario();
@@ -78,14 +81,14 @@ public class UsuarioService {
         // Validação de senhas se foram preenchidas
         boolean atualizarSenha = dto.novaSenha() != null && !dto.novaSenha().isEmpty();
         if (atualizarSenha && !dto.novaSenha().equals(dto.confirmaNovaSenha())) {
-            throw new RuntimeException("As senhas não coincidem.");
+            throw new InvalidDataException("As senhas não coincidem.");
         }
 
         Usuario usuario = buscarPorId(dto.id());
 
         // Validação de e-mail duplicado
         if (!dto.email().equalsIgnoreCase(usuario.getEmail()) && usuarioRepository.existsByEmailIgnoreCase(dto.email())) {
-            throw new RuntimeException("O e-mail '" + dto.email() + "' já está em uso por outra conta.");
+            throw new DataConflictException("O e-mail '" + dto.email() + "' já está em uso por outra conta.");
         }
 
         usuario.setNome(dto.nome());
@@ -100,19 +103,19 @@ public class UsuarioService {
     }
 
     public void excluirUsuario(Long id, Usuario adminLogado) {
+        // 1. Valida a regra de negócio de auto-exclusão
         if (id.equals(adminLogado.getId())) {
-            throw new RuntimeException("Um administrador não pode excluir a si mesmo.");
+            throw new InvalidDataException("Um administrador não pode excluir a si mesmo.");
         }
-        // TODO: Lógica para impedir exclusão do último admin
 
+        // TODO: Lógica para impedir exclusão do último admin (aqui também seria uma InvalidDataException)
+
+        // 2. Valida se o recurso a ser excluído realmente existe
         if (!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("Usuário a ser excluído não encontrado. ID: " + id);
+            throw new ResourceNotFoundException("Usuário a ser excluído não encontrado. ID: " + id);
         }
-        try {
-            usuarioRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Não é possível excluir o usuário, pois ele possui registros associados.");
-        }
+
+        usuarioRepository.deleteById(id);
     }
 
     public void atualizarPerfil(Usuario usuarioLogado, PerfilEditDTO dto) {
@@ -120,7 +123,7 @@ public class UsuarioService {
         if (!dto.email().equalsIgnoreCase(usuarioLogado.getEmail())) {
             // Se foi, verifica se o novo e-mail já existe para outro usuário
             if (usuarioRepository.existsByEmailIgnoreCase(dto.email())) {
-                throw new RuntimeException("O e-mail '" + dto.email() + "' já está em uso por outra conta.");
+                throw new DataConflictException("O e-mail '" + dto.email() + "' já está em uso por outra conta.");
             }
         }
 
@@ -133,12 +136,12 @@ public class UsuarioService {
     public void alterarSenha(Usuario usuarioLogado, SenhaChangeDTO dto) {
         // 1. Valida se a nova senha e a confirmação são iguais
         if (!dto.novaSenha().equals(dto.confirmaNovaSenha())) {
-            throw new RuntimeException("A nova senha e a confirmação não coincidem.");
+            throw new InvalidDataException("A nova senha e a confirmação não coincidem.");
         }
 
         // 2. Usa o PasswordEncoder para verificar se a senha atual corresponde à do banco
         if (!passwordEncoder.matches(dto.senhaAtual(), usuarioLogado.getPassword())) {
-            throw new RuntimeException("A 'Senha Atual' está incorreta.");
+            throw new InvalidDataException("A 'Senha Atual' está incorreta.");
         }
 
         // 3. Criptografa e define a nova senha
@@ -148,14 +151,12 @@ public class UsuarioService {
     }
 
     public void excluir(Long id) {
+        // 1. Valida se o recurso a ser excluído realmente existe.
+        //    Se não existir, lança a exceção correta para gerar um 404 Not Found.
         if (!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("Usuário não encontrado. ID: " + id);
+            throw new ResourceNotFoundException("Usuário não encontrado. ID: " + id);
         }
-        try {
-            usuarioRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            // Substitui a checagem do SQLState "23503"
-            throw new RuntimeException("Não é possível excluir o usuário, pois ele possui registros associados.");
-        }
+
+        usuarioRepository.deleteById(id);
     }
 }

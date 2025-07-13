@@ -16,6 +16,7 @@ import br.ufscar.dc.dsw.com.gametester.repository.ProjetoRepository;
 import br.ufscar.dc.dsw.com.gametester.repository.SessaoTesteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,36 +72,45 @@ public class SessaoTesteService {
      * Inicia uma sessão de teste, mudando seu status para EM_EXECUCAO.
      * Garante que o usuário tem permissão e que a sessão está no estado correto.
      */
-    public void iniciarSessao(Long sessaoId, Usuario usuarioLogado) {
-        SessaoTeste sessao = getSessaoEChecarPermissao(sessaoId, usuarioLogado);
+    // Em SessaoTesteService.java
 
-        // Regra de Negócio: Só pode iniciar uma sessão no estado 'CRIADO'
-        if (sessao.getStatus() != StatusSessao.CRIADO) {
-            throw new IllegalStateException("A sessão de teste (ID: " + sessaoId + ") não pode ser iniciada pois seu status é '" + sessao.getStatus() + "'.");
+    public SessaoTeste iniciarSessao(Long sessaoId, Usuario usuarioLogado) {
+        SessaoTeste sessao = buscarSessaoParaVisualizacao(sessaoId, usuarioLogado);
+
+        // ✅ NOVA REGRA: Verifica se o status permite a ação de "iniciar".
+        if (sessao.getStatus() == StatusSessao.EM_EXECUCAO || sessao.getStatus() == StatusSessao.FINALIZADO) {
+            throw new InvalidDataException("Esta sessão já foi iniciada ou finalizada e não pode ser iniciada novamente.");
         }
 
         sessao.setStatus(StatusSessao.EM_EXECUCAO);
         sessao.setDataHoraInicio(LocalDateTime.now());
-        // A transação do Spring fará o save automaticamente
+        return sessaoTesteRepository.save(sessao);
     }
+
 
     /**
      * Finaliza uma sessão de teste, mudando seu status para FINALIZADO.
      * Garante que o usuário tem permissão e que a sessão está no estado correto.
      */
-    public void finalizarSessao(Long sessaoId, Usuario usuarioLogado) {
-        // CORREÇÃO: Usando o ID Long diretamente e a lógica de permissão
-        SessaoTeste sessao = getSessaoEChecarPermissao(sessaoId, usuarioLogado);
+    // Em SessaoTesteService.java
 
-        // Regra de Negócio: Só pode finalizar uma sessão 'EM_EXECUCAO'
+    @Transactional
+    public SessaoTeste finalizarSessao(Long sessaoId, Usuario usuarioLogado) {
+        // 1. Busca a sessão e verifica a permissão
+        SessaoTeste sessao = buscarSessaoParaVisualizacao(sessaoId, usuarioLogado);
+
+        // 2. Aplica a regra de negócio (ex: só pode finalizar se estiver em andamento)
         if (sessao.getStatus() != StatusSessao.EM_EXECUCAO) {
-            throw new IllegalStateException("A sessão só pode ser finalizada se estiver EM EXECUÇÃO.");
+            throw new InvalidDataException("A sessão não pode ser finalizada, pois seu status atual é: " + sessao.getStatus());
         }
 
+        // 3. Altera o estado da entidade
         sessao.setStatus(StatusSessao.FINALIZADO);
-        // CORREÇÃO: Usando LocalDateTime, que é o tipo da entidade
-        sessao.setDataHoraFim(LocalDateTime.now());    }
+        sessao.setDataHoraFim(LocalDateTime.now());
 
+        // 4. Salva e RETORNA a entidade atualizada
+        return sessaoTesteRepository.save(sessao);
+    }
     /**
      * Busca uma sessão específica para visualização, checando permissões.
      * Usado para carregar a página de detalhes da sessão.
@@ -116,10 +126,9 @@ public class SessaoTesteService {
      * Necessário para a página "Minhas Sessões".
      */
     @Transactional(readOnly = true)
-    public List<SessaoTeste> listarSessoesPorTestador(Usuario testador) {
-        return sessaoTesteRepository.findByTestadorOrderByDataHoraCriacaoDesc(testador);
+    public List<SessaoTeste> listarSessoesPorTestador(Usuario usuarioLogado, Pageable pageable) {
+        return sessaoTesteRepository.findByTestador(usuarioLogado, pageable);
     }
-
     /**
      * Lista todas as sessões de um projeto específico.
      * Garante que o usuário logado tem permissão para ver as sessões do projeto.

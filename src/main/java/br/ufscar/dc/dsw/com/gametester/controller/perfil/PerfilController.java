@@ -1,90 +1,64 @@
-package br.ufscar.dc.dsw.com.gametester.controller.perfil;
+package br.ufscar.dc.dsw.com.gametester.controller.api.perfil;
 
 import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.dto.PerfilEditDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.SenhaChangeDTO;
+import br.ufscar.dc.dsw.com.gametester.dto.UsuarioResponseDTO;
 import br.ufscar.dc.dsw.com.gametester.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/perfil")
+@RestController
+@RequestMapping("/api/perfil") // Recurso que representa o usuário autenticado
 public class PerfilController {
 
     @Autowired
     private UsuarioService usuarioService;
 
-    // --- MÉTODOS PARA EDITAR PERFIL ---
-
     /**
-     * Substitui o doGet do EditarPerfilServlet.
-     * Exibe o formulário de edição de perfil com os dados do usuário logado.
+     * Retorna os dados do perfil do usuário atualmente logado.
+     * Mapeado para: GET /api/perfil
      */
-    @GetMapping("/editar")
-    public String mostrarFormularioEditar(@AuthenticationPrincipal Usuario usuarioLogado, Model model) {
-        // Se não houver um DTO vindo de um erro de POST, cria um novo com os dados atuais
-        if (!model.containsAttribute("perfilDTO")) {
-            model.addAttribute("perfilDTO", new PerfilEditDTO(usuarioLogado.getNome(), usuarioLogado.getEmail()));
-        }
-        return "perfil/editar-perfil";
+    @GetMapping
+    public ResponseEntity<UsuarioResponseDTO> obterMeuPerfil(@AuthenticationPrincipal Usuario usuarioLogado) {
+        // O objeto 'usuarioLogado' já foi carregado pelo nosso SecurityFilter.
+        // Apenas precisamos convertê-lo para o DTO de resposta.
+        return ResponseEntity.ok(new UsuarioResponseDTO(usuarioLogado));
     }
 
     /**
-     * Substitui o doPost do EditarPerfilServlet.
-     * Processa a atualização do perfil.
+     * Atualiza os dados do perfil (nome, e-mail) do usuário logado.
+     * Mapeado para: PUT /api/perfil
      */
-    @PostMapping("/editar")
-    public String processarEdicaoPerfil(@Valid @ModelAttribute("perfilDTO") PerfilEditDTO dto, BindingResult result,
-                                        @AuthenticationPrincipal Usuario usuarioLogado, RedirectAttributes ra) {
-        if (result.hasErrors()) {
-            return "perfil/editar-perfil"; // Retorna ao formulário com os erros de validação
-        }
-        try {
-            usuarioService.atualizarPerfil(usuarioLogado, dto);
-            ra.addFlashAttribute("mensagemSucesso", "Perfil atualizado com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao atualizar perfil: " + e.getMessage());
-        }
-        return "redirect:/perfil/editar";
-    }
+    @PutMapping
+    public ResponseEntity<UsuarioResponseDTO> atualizarMeuPerfil(
+            @AuthenticationPrincipal Usuario usuarioLogado,
+            @Valid @RequestBody PerfilEditDTO dto) {
 
-    // --- MÉTODOS PARA ALTERAR SENHA ---
+        // A lógica de negócio permanece no serviço.
+        // Ajuste o serviço para retornar o usuário atualizado para maior clareza.
+        Usuario usuarioAtualizado = usuarioService.atualizarPerfil(usuarioLogado, dto);
 
-    /**
-     * Substitui o doGet do AlterarSenhaServlet.
-     * Exibe o formulário para alterar a senha.
-     */
-    @GetMapping("/alterar-senha")
-    public String mostrarFormularioSenha(Model model) {
-        model.addAttribute("senhaDTO", new SenhaChangeDTO("", "", ""));
-        return "perfil/alterar-senha";
+        // Retorna 200 OK com os dados atualizados do usuário.
+        return ResponseEntity.ok(new UsuarioResponseDTO(usuarioAtualizado));
     }
 
     /**
-     * Substitui o doPost do AlterarSenhaServlet.
-     * Processa a alteração da senha.
+     * Altera a senha do usuário logado.
+     * Mapeado para: PUT /api/perfil/senha
      */
-    @PostMapping("/alterar-senha")
-    public String processarAlteracaoSenha(@Valid @ModelAttribute("senhaDTO") SenhaChangeDTO dto, BindingResult result,
-                                          @AuthenticationPrincipal Usuario usuarioLogado, RedirectAttributes ra) {
-        if (result.hasErrors()) {
-            return "perfil/alterar-senha"; // Retorna ao formulário com os erros de validação
-        }
-        try {
-            usuarioService.alterarSenha(usuarioLogado, dto);
-            ra.addFlashAttribute("mensagemSucesso", "Senha alterada com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", e.getMessage());
-        }
-        return "redirect:/perfil/alterar-senha";
+    @PutMapping("/senha")
+    public ResponseEntity<Void> alterarMinhaSenha(
+            @AuthenticationPrincipal Usuario usuarioLogado,
+            @Valid @RequestBody SenhaChangeDTO dto) {
+
+        // A lógica de negócio (verificar senha atual, etc.) está no serviço.
+        usuarioService.alterarSenha(usuarioLogado, dto);
+
+        // Retorna 204 No Content para indicar sucesso sem corpo de resposta.
+        return ResponseEntity.noContent().build();
     }
 }

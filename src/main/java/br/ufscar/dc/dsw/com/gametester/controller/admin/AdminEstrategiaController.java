@@ -1,106 +1,84 @@
-package br.ufscar.dc.dsw.com.gametester.controller.admin;
+package br.ufscar.dc.dsw.com.gametester.controller.api.admin;
 
 import br.ufscar.dc.dsw.com.gametester.domain.Estrategia;
-import br.ufscar.dc.dsw.com.gametester.dto.EstrategiaDTO;
+import br.ufscar.dc.dsw.com.gametester.dto.EstrategiaDTO; // DTO de entrada para criar/editar
+import br.ufscar.dc.dsw.com.gametester.dto.EstrategiaResponseDTO; // DTO de saída
 import br.ufscar.dc.dsw.com.gametester.service.EstrategiaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@Controller
-@RequestMapping("/admin/estrategias")
+import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/admin/estrategias")
 public class AdminEstrategiaController {
 
     @Autowired
     private EstrategiaService estrategiaService;
 
+    /**
+     * READ (All) - Lista todas as estratégias.
+     * Mapeado para: GET /api/admin/estrategias
+     */
     @GetMapping
-    public String doGetActions(@RequestParam(name = "action", defaultValue = "listar") String action,
-                               @RequestParam(name = "id", required = false) Integer id,
-                               Model model, RedirectAttributes ra) {
-        try {
-            switch (action) {
-                case "novo":
-                    return mostrarFormularioNovaEstrategia(model);
-                case "editar":
-                    return mostrarFormularioEditarEstrategia(id, model);
-                case "excluir":
-                    return excluirEstrategia(id, ra);
-                case "listar":
-                default:
-                    return listarEstrategias(model);
-            }
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao processar a ação: " + e.getMessage());
-            return "redirect:/admin/estrategias?action=listar";
-        }
+    public ResponseEntity<List<EstrategiaResponseDTO>> listarEstrategias() {
+        List<Estrategia> estrategias = estrategiaService.listarTodas();
+        List<EstrategiaResponseDTO> dtos = estrategias.stream()
+                .map(EstrategiaResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
-    @PostMapping
-    public String doPostActions(@RequestParam(name = "action", defaultValue = "") String action,
-                                @Valid @ModelAttribute("estrategiaDTO") EstrategiaDTO dto,
-                                BindingResult result, RedirectAttributes ra, Model model) {
-        if ("salvar".equals(action)) {
-            return salvarEstrategia(dto, result, ra, model);
-        }
-        return "redirect:/admin/estrategias?action=listar";
-    }
-
-    // --- MÉTODOS PRIVADOS ---
-
-    private String listarEstrategias(Model model) {
-        model.addAttribute("listaEstrategias", estrategiaService.listarTodas());
-        return "admin/estrategia/lista";
-    }
-
-    private String mostrarFormularioNovaEstrategia(Model model) {
-        model.addAttribute("estrategiaDTO", new EstrategiaDTO(null, "", "", "", "", ""));
-        model.addAttribute("action", "salvar");
-        return "admin/estrategia/formulario";
-    }
-
-    private String mostrarFormularioEditarEstrategia(Integer id, Model model) {
+    /**
+     * READ (One) - Busca uma estratégia pelo ID.
+     * Mapeado para: GET /api/admin/estrategias/{id}
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<EstrategiaResponseDTO> buscarEstrategiaPorId(@PathVariable Integer id) {
         Estrategia estrategia = estrategiaService.buscarPorId(id);
-        EstrategiaDTO dto = new EstrategiaDTO(estrategia.getId(), estrategia.getNome(), estrategia.getDescricao(), estrategia.getExemplos(), estrategia.getDicas(), "");
-        model.addAttribute("estrategiaDTO", dto);
-        model.addAttribute("action", "salvar");
-        return "admin/estrategia/formulario";
+        return ResponseEntity.ok(new EstrategiaResponseDTO(estrategia));
     }
 
-    private String salvarEstrategia(EstrategiaDTO dto, BindingResult result, RedirectAttributes ra, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("action", "salvar");
-            return "admin/estrategia/formulario";
-        }
-        try {
-            if (dto.id() == null) {
-                estrategiaService.criarEstrategia(dto);
-                ra.addFlashAttribute("mensagemSucesso", "Estratégia cadastrada com sucesso!");
-            } else {
-                estrategiaService.editarEstrategia(dto);
-                ra.addFlashAttribute("mensagemSucesso", "Estratégia atualizada com sucesso!");
-            }
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao salvar estratégia: " + e.getMessage());
-        }
-        return "redirect:/admin/estrategias?action=listar";
+    /**
+     * CREATE - Cria uma nova estratégia.
+     * Mapeado para: POST /api/admin/estrategias
+     */
+    @PostMapping
+    public ResponseEntity<EstrategiaResponseDTO> criarEstrategia(@Valid @RequestBody EstrategiaDTO dto) {
+        Estrategia novaEstrategia = estrategiaService.criarEstrategia(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(novaEstrategia.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(new EstrategiaResponseDTO(novaEstrategia));
     }
 
-    private String excluirEstrategia(Integer id, RedirectAttributes ra) {
-        try {
-            estrategiaService.excluirEstrategia(id);
-            ra.addFlashAttribute("mensagemSucesso", "Estratégia excluída com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao excluir estratégia: " + e.getMessage());
+    /**
+     * UPDATE - Atualiza uma estratégia existente.
+     * Mapeado para: PUT /api/admin/estrategias/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<EstrategiaResponseDTO> atualizarEstrategia(@PathVariable Integer id, @Valid @RequestBody EstrategiaDTO dto) {
+        // Validação para garantir consistência entre o ID da URL e o do corpo
+        if (!id.equals(dto.id())) {
+            // throw new InvalidDataException("Conflito de IDs na requisição de atualização.");
         }
-        return "redirect:/admin/estrategias?action=listar";
+        Estrategia estrategiaAtualizada = estrategiaService.editarEstrategia(dto);
+        return ResponseEntity.ok(new EstrategiaResponseDTO(estrategiaAtualizada));
+    }
+
+    /**
+     * DELETE - Exclui uma estratégia.
+     * Mapeado para: DELETE /api/admin/estrategias/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluirEstrategia(@PathVariable Integer id) {
+        estrategiaService.excluirEstrategia(id);
+        return ResponseEntity.noContent().build();
     }
 }

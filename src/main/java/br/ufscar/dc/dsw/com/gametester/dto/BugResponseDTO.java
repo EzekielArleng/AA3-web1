@@ -23,7 +23,7 @@ public record BugResponseDTO(
                 bug.getSessaoTeste().getId(), // Pega apenas o ID da sessão associada
                 bug.getDescricao(),
                 bug.getSeveridade(),
-                bug.getDataRegistro().toLocalDateTime(), // Converte o Timestamp para LocalDateTime
+                bug.getDataRegistro(),
                 bug.getScreenshotUrl()
         );
     }

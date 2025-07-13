@@ -4,6 +4,7 @@ import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.dto.AdminUsuarioCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.AdminUsuarioEditDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.UsuarioResponseDTO; // Importando o novo DTO
+import br.ufscar.dc.dsw.com.gametester.exception.InvalidDataException;
 import br.ufscar.dc.dsw.com.gametester.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,8 +75,7 @@ public class AdminUsuarioRestController {
     public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody AdminUsuarioEditDTO dto) {
         // Garante que o ID do DTO seja o mesmo da URL para consistência
         if (!id.equals(dto.id())) {
-            // Você pode lançar uma exceção de dados inválidos aqui se desejar
-            // throw new InvalidDataException("O ID na URL não corresponde ao ID no corpo da requisição.");
+            throw new InvalidDataException("O ID na URL não corresponde ao ID no corpo da requisição.");
         }
         Usuario usuarioAtualizado = usuarioService.editarUsuarioPorAdmin(dto);
         return ResponseEntity.ok(new UsuarioResponseDTO(usuarioAtualizado));

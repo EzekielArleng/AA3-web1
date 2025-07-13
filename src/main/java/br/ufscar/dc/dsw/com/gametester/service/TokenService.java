@@ -22,11 +22,7 @@ public class TokenService {
     @Value("${api.security.token.issuer}")
     private String issuer;
 
-    /**
-     * Gera um novo token JWT para o usuário fornecido.
-     * @param usuario O usuário para o qual o token será gerado.
-     * @return Uma string contendo o token JWT.
-     */
+
     public String gerarToken(Usuario usuario) {
         try {
             // Define o algoritmo de assinatura usando o nosso segredo

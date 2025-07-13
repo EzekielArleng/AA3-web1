@@ -37,7 +37,7 @@ public class Bug implements Serializable {
     public Bug() {
     }
 
-    public Bug(Integer id, SessaoTeste sessaoTeste, String descricao, Severidade severidade, Timestamp dataRegistro, String screenshotUrl) {
+    public Bug(Integer id, SessaoTeste sessaoTeste, String descricao, Severidade severidade, LocalDateTime dataRegistro, String screenshotUrl) {
         this.id = id;
         this.sessaoTeste = sessaoTeste;
         this.descricao = descricao;
@@ -79,11 +79,11 @@ public class Bug implements Serializable {
         this.severidade = severidade;
     }
 
-    public Timestamp getDataRegistro() {
+    public LocalDateTime getDataRegistro() {
         return dataRegistro;
     }
 
-    public void setDataRegistro(Timestamp dataRegistro) {
+    public void setDataRegistro(LocalDateTime dataRegistro) {
         this.dataRegistro = dataRegistro;
     }
 

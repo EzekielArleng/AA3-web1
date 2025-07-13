@@ -1,146 +1,91 @@
-package br.ufscar.dc.dsw.com.gametester.controller;
+package br.ufscar.dc.dsw.com.gametester.controller.api.testador;
 
 import br.ufscar.dc.dsw.com.gametester.domain.SessaoTeste;
 import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
-import br.ufscar.dc.dsw.com.gametester.dto.BugCreateDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.SessaoCreateDTO;
-import br.ufscar.dc.dsw.com.gametester.service.BugService;
-import br.ufscar.dc.dsw.com.gametester.service.EstrategiaService;
-import br.ufscar.dc.dsw.com.gametester.service.ProjetoService;
+import br.ufscar.dc.dsw.com.gametester.dto.SessaoResponseDTO;
 import br.ufscar.dc.dsw.com.gametester.service.SessaoTesteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Controller
-@RequestMapping("/testador/sessoes")
+@RestController
+@RequestMapping("/api/testador/sessoes")
 public class SessaoTesteController {
 
-    @Autowired private SessaoTesteService sessaoTesteService;
-    @Autowired private BugService bugService;
-    @Autowired private ProjetoService projetoService;
-    @Autowired private EstrategiaService estrategiaService;
+    @Autowired
+    private SessaoTesteService sessaoTesteService;
 
     /**
-     * Exibe a lista de todas as sessões do testador logado.
-     * Mapeado para a URL base: GET /testador/sessoes
+     * READ (All) - Lista todas as sessões do testador logado.
      */
     @GetMapping
-    public String listarMinhasSessoes(@AuthenticationPrincipal Usuario testador, Model model) {
-        List<SessaoTeste> sessoes = sessaoTesteService.listarSessoesPorTestador(testador);
-        model.addAttribute("listaMinhasSessoes", sessoes);
-        return "testador/minhas-sessoes";
-    }
+    public ResponseEntity<List<SessaoResponseDTO>> listarMinhasSessoes(
+            @AuthenticationPrincipal Usuario testador,
+            @PageableDefault(sort = "dataHoraCriacao", direction = Sort.Direction.DESC) Pageable pageable) {
 
-
-
-    /**
-     * Exibe o formulário para criar uma nova sessão de teste.
-     * Mapeado para GET /testador/sessoes/nova
-     */
-    @GetMapping("/nova")
-    public String exibirFormularioCriacao(Model model, @AuthenticationPrincipal Usuario testador) {
-        model.addAttribute("projetosDoTestador", projetoService.listarProjetosDoUsuario(testador, Sort.by("nome")));
-        model.addAttribute("estrategias", estrategiaService.listarTodas());
-        model.addAttribute("sessaoDTO", new SessaoCreateDTO(null, null, 30, ""));
-        return "testador/sessao/formularioSessao";
+        List<SessaoTeste> sessoes = sessaoTesteService.listarSessoesPorTestador(testador, pageable);
+        List<SessaoResponseDTO> dtos = sessoes.stream().map(SessaoResponseDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
-     * Processa a criação da nova sessão de teste.
-     * Mapeado para POST /testador/sessoes/nova
-     */
-    @PostMapping("/nova")
-    public String processarCriacao(@Valid @ModelAttribute("sessaoDTO") SessaoCreateDTO dto,
-                                   BindingResult result, @AuthenticationPrincipal Usuario testador,
-                                   RedirectAttributes ra, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("projetosDoTestador", projetoService.listarProjetosDoUsuario(testador, Sort.by("nome")));
-            model.addAttribute("estrategias", estrategiaService.listarTodas());
-            return "testador/sessao/formularioSessao";
-        }
-        try {
-            sessaoTesteService.criarSessao(dto, testador);
-            ra.addFlashAttribute("mensagemSucesso", "Sessão de teste criada com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao criar sessão: " + e.getMessage());
-        }
-        return "redirect:/testador/sessoes";
-    }
-
-    /**
-     * Inicia uma sessão de teste.
-     * Mapeado para POST /testador/sessoes/{id}/iniciar
-     */
-    @PostMapping("/{id}/iniciar")
-    public String iniciarSessao(@PathVariable("id") Long sessaoId, @AuthenticationPrincipal Usuario usuarioLogado, RedirectAttributes ra) {
-        try {
-            sessaoTesteService.iniciarSessao(sessaoId, usuarioLogado);
-            ra.addFlashAttribute("mensagemSucesso", "Sessão (ID: " + sessaoId + ") iniciada!");
-            return "redirect:/testador/sessoes/" + sessaoId;
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao iniciar sessão: " + e.getMessage());
-            return "redirect:/testador/sessoes";
-        }
-    }
-
-    /**
-     * Finaliza uma sessão de teste.
-     * Mapeado para POST /testador/sessoes/{id}/finalizar
-     */
-    @PostMapping("/{id}/finalizar")
-    public String finalizarSessao(@PathVariable("id") Long sessaoId, @AuthenticationPrincipal Usuario usuarioLogado, RedirectAttributes ra) {
-        try {
-            sessaoTesteService.finalizarSessao(sessaoId, usuarioLogado);
-            ra.addFlashAttribute("mensagemSucesso", "Sessão (ID: " + sessaoId + ") finalizada com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao finalizar sessão: " + e.getMessage());
-        }
-        return "redirect:/testador/sessoes";
-    }
-
-    /**
-     * Exibe a página de detalhes de uma sessão.
-     * Mapeado para GET /testador/sessoes/{id}
+     * READ (One) - Busca os detalhes de uma sessão específica.
      */
     @GetMapping("/{id}")
-    public String visualizarSessao(@PathVariable("id") Long sessaoId, Model model, @AuthenticationPrincipal Usuario usuarioLogado, RedirectAttributes ra) {
-        try {
-            model.addAttribute("sessao", sessaoTesteService.buscarSessaoParaVisualizacao(sessaoId, usuarioLogado));
-            model.addAttribute("bugDTO", new BugCreateDTO("", "", ""));
-            return "testador/sessao/sessao-detalhe";
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", e.getMessage());
-            return "redirect:/testador/sessoes";
-        }
+    public ResponseEntity<SessaoResponseDTO> visualizarSessao(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+
+        SessaoTeste sessao = sessaoTesteService.buscarSessaoParaVisualizacao(id, usuarioLogado);
+        return ResponseEntity.ok(new SessaoResponseDTO(sessao));
     }
 
     /**
-     * Processa o registro de um novo bug para uma sessão.
-     * Mapeado para POST /testador/sessoes/{id}/bugs
+     * CREATE - Cria uma nova sessão de teste.
      */
-    @PostMapping("/{id}/bugs")
-    public String registrarBug(@PathVariable("id") Long sessaoId, @Valid @ModelAttribute("bugDTO") BugCreateDTO dto,
-                               BindingResult result, @AuthenticationPrincipal Usuario usuarioLogado,
-                               RedirectAttributes ra, Model model) {
-        try {
-            if (result.hasErrors()) {
-                model.addAttribute("sessao", sessaoTesteService.buscarSessaoParaVisualizacao(sessaoId, usuarioLogado));
-                return "testador/sessao/sessao-detalhe";
-            }
-            bugService.criarBug(dto, sessaoId, usuarioLogado);
-            ra.addFlashAttribute("mensagemSucesso", "Novo bug registrado com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("mensagemErro", "Erro ao registrar bug: " + e.getMessage());
-        }
-        return "redirect:/testador/sessoes/" + sessaoId;
+    @PostMapping
+    public ResponseEntity<SessaoResponseDTO> criarSessao(
+            @Valid @RequestBody SessaoCreateDTO dto,
+            @AuthenticationPrincipal Usuario testador) {
+
+        SessaoTeste novaSessao = sessaoTesteService.criarSessao(dto, testador);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(novaSessao.getId()).toUri();
+        return ResponseEntity.created(location).body(new SessaoResponseDTO(novaSessao));
+    }
+
+    /**
+     * ACTION: Inicia uma sessão de teste.
+     */
+    @PostMapping("/{id}/iniciar")
+    public ResponseEntity<SessaoResponseDTO> iniciarSessao(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+
+        SessaoTeste sessaoIniciada = sessaoTesteService.iniciarSessao(id, usuarioLogado);
+        return ResponseEntity.ok(new SessaoResponseDTO(sessaoIniciada));
+    }
+
+    /**
+     * ACTION: Finaliza uma sessão de teste.
+     */
+    @PostMapping("/{id}/finalizar")
+    public ResponseEntity<SessaoResponseDTO> finalizarSessao(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+
+        SessaoTeste sessaoFinalizada = sessaoTesteService.finalizarSessao(id, usuarioLogado);
+        return ResponseEntity.ok(new SessaoResponseDTO(sessaoFinalizada));
     }
 }

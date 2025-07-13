@@ -1,4 +1,5 @@
-import br.ufscar.dc.dsw.com.gametester.controller;
+package br.ufscar.dc.dsw.com.gametester.controller;
+
 import br.ufscar.dc.dsw.com.gametester.domain.Usuario;
 import br.ufscar.dc.dsw.com.gametester.dto.LoginRequestDTO;
 import br.ufscar.dc.dsw.com.gametester.dto.LoginResponseDTO;
@@ -7,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.token.TokenService;
+import br.ufscar.dc.dsw.com.gametester.service.TokenService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

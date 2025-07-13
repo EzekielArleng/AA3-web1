@@ -10,6 +10,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,11 +77,8 @@ public class ProjetoService {
     }
 
     @Transactional(readOnly = true)
-    public List<Projeto> listarProjetosDoUsuario(Usuario usuario, Sort sort) {
-        if (usuario == null) {
-            return Collections.emptyList(); // Retorna lista vazia se o usuário for nulo
-        }
-        return projetoRepository.findByMembros_Id(usuario.getId(), sort);
+    public List<Projeto> listarProjetosDoUsuario(Usuario usuarioLogado, Pageable pageable) {
+        return projetoRepository.findByMembrosContains(usuarioLogado, pageable);
     }
 
     public void adicionarMembro(Integer projetoId, Long usuarioId) {

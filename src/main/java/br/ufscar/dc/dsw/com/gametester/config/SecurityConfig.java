@@ -26,10 +26,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    // Em SecurityConfig.java
-    // Em SecurityConfig.java
-
-    // Em SecurityConfig.java
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder; // ✅ Import
 import org.springframework.web.bind.annotation.*;
 
+// Autenticação de usuário, irá gerar um token que será validado à cada requisição
+
 @RestController
 @RequestMapping("/api")
 public class AuthenticationController {

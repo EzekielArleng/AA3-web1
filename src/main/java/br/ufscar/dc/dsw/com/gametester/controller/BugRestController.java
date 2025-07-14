@@ -1,4 +1,4 @@
-package br.ufscar.dc.dsw.com.gametester.controller.api;
+package br.ufscar.dc.dsw.com.gametester.controller;
 
 import br.ufscar.dc.dsw.com.gametester.domain.Bug;
 import br.ufscar.dc.dsw.com.gametester.domain.Usuario;

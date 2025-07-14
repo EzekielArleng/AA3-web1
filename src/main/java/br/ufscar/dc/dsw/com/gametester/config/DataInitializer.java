@@ -23,7 +23,6 @@ public class DataInitializer implements CommandLineRunner {
             admin.setNome("Administrador");
             admin.setEmail("admin@email.com");
 
-            // ✅ GARANTA QUE SEU CÓDIGO ESTÁ EXATAMENTE ASSIM
             admin.setSenha(passwordEncoder.encode("adminpassword"));
 
             admin.setTipoPerfil(TipoPerfil.ROLE_ADMINISTRADOR);

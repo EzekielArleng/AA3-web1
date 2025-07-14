@@ -39,18 +39,19 @@ public class SessaoTesteService {
      * Garante que o testador logado é membro do projeto.
      */
     public SessaoTeste criarSessao(SessaoCreateDTO dto, Usuario testador) {
-
+        // Cria sessão apenas se existir um projeto ou uma estratégia
         Projeto projeto = projetoRepository.findById(dto.projetoId())
                 .orElseThrow(() -> new RuntimeException("Projeto não encontrado."));
         Estrategia estrategia = estrategiaRepository.findById(dto.estrategiaId())
                 .orElseThrow(() -> new RuntimeException("Estratégia não encontrada."));
 
 
-        // Regra de autorização: o testador é membro do projeto?
+        // Cria sessão apenas se o usuário for membro do projeto
         if (projeto.getMembros().stream().noneMatch(membro -> membro.equals(testador))) {
             throw new SecurityException("Você não é membro deste projeto e não pode criar sessões para ele.");
         }
 
+        // Cria a sessão
         SessaoTeste novaSessao = new SessaoTeste();
         novaSessao.setProjeto(projeto);
         novaSessao.setEstrategia(estrategia);
@@ -59,6 +60,7 @@ public class SessaoTesteService {
         novaSessao.setDescricao(dto.descricao());
         novaSessao.setStatus(StatusSessao.CRIADO); // Status inicial é sempre CRIADO
 
+        // Salva a sessão
         return sessaoTesteRepository.save(novaSessao);
     }
 
@@ -76,13 +78,15 @@ public class SessaoTesteService {
     // Em SessaoTesteService.java
 
     public SessaoTeste iniciarSessao(Long sessaoId, Usuario usuarioLogado) {
+        // Busca a sessão e verifica a permissão
         SessaoTeste sessao = buscarSessaoParaVisualizacao(sessaoId, usuarioLogado);
 
-        // ✅ NOVA REGRA: Verifica se o status permite a ação de "iniciar".
+        // Verifica se o status permite a ação de "iniciar".
         if (sessao.getStatus() == StatusSessao.EM_EXECUCAO || sessao.getStatus() == StatusSessao.FINALIZADO) {
             throw new InvalidDataException("Esta sessão já foi iniciada ou finalizada e não pode ser iniciada novamente.");
         }
 
+        // Inicia a sessão no horário do LocalDateTime
         sessao.setStatus(StatusSessao.EM_EXECUCAO);
         sessao.setDataHoraInicio(LocalDateTime.now());
         return sessaoTesteRepository.save(sessao);
@@ -97,19 +101,19 @@ public class SessaoTesteService {
 
     @Transactional
     public SessaoTeste finalizarSessao(Long sessaoId, Usuario usuarioLogado) {
-        // 1. Busca a sessão e verifica a permissão
+        // Busca a sessão e verifica a permissão
         SessaoTeste sessao = buscarSessaoParaVisualizacao(sessaoId, usuarioLogado);
 
-        // 2. Aplica a regra de negócio (ex: só pode finalizar se estiver em andamento)
+        // Sessão somente pode ser finalizada se estiver em execução
         if (sessao.getStatus() != StatusSessao.EM_EXECUCAO) {
             throw new InvalidDataException("A sessão não pode ser finalizada, pois seu status atual é: " + sessao.getStatus());
         }
 
-        // 3. Altera o estado da entidade
+        // Finaliza a sessão no horário do LocalDateTime
         sessao.setStatus(StatusSessao.FINALIZADO);
         sessao.setDataHoraFim(LocalDateTime.now());
 
-        // 4. Salva e RETORNA a entidade atualizada
+        // Salva e retorna a sessão atualizada
         return sessaoTesteRepository.save(sessao);
     }
     /**

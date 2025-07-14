@@ -168,4 +168,6 @@ public class Usuario implements UserDetails, Serializable {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+
 }

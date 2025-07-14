@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao Game Tester System</title>
+    <style>
+        /* O CSS permanece exatamente o mesmo */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px 50px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+        }
+        h1 {
+            color: #0056b3;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+        }
+        p.intro-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-top: 0;
+            margin-bottom: 35px;
+            color: #555;
+        }
+        .action-buttons a {
+            margin: 10px;
+        }
+        .btn-base {
+            display: inline-block;
+            padding: 14px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+        .btn-base:hover, .btn-base:focus {
+            transform: translateY(-2px);
+            outline: none;
+        }
+        .btn-login {
+            background-color: #007bff;
+        }
+        .btn-login:hover, .btn-login:focus {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover, .btn-secondary:focus {
+            background-color: #545b62;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-bottom: 20px;
+            font-size: 0.9em;
+            color: #777;
+            width: 100%;
+        }
+        .footer p { margin: 0; padding: 0; font-size: 1em; line-height: normal; color: inherit; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Game Tester System</h1>
+    <p class="intro-text">
+        Bem-vindo à sua plataforma dedicada para gerenciamento e execução de testes exploratórios em jogos digitais.
+        Organize seus projetos, defina estratégias e acompanhe suas sessões de teste de forma eficiente.
+    </p>
+    <div class="action-buttons">
+        <a href="/login.html" class="btn-base btn-login">Acessar o Sistema</a>
+        <a href="/estrategias.html" class="btn-base btn-secondary">Ver Estratégias</a>
+    </div>
+</div>
+
+<div class="footer">
+    <p>&copy; <span id="currentYear"></span> Game Tester System. Todos os direitos reservados.</p>
+</div>
+
+<script>
+    // Garante que o script rode apenas depois que o conteúdo da página for carregado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pega o elemento do rodapé pelo seu ID
+        const yearSpan = document.getElementById('currentYear');
+        // Calcula o ano atual usando o objeto Date do próprio JavaScript
+        const currentYear = new Date().getFullYear();
+        // Insere o ano no conteúdo do span
+        yearSpan.textContent = currentYear;
+    });
+</script>
+
+</body>
+</html>
